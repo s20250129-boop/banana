@@ -1,0 +1,4183 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#073B47">
+<title>數字冒險島 · 玩住闖關，練好數學</title>
+<meta name="description" content="數字冒險島：為中小學生而設的數學冒險遊戲。六個島嶼、三種難度、徽章收集、錯題重練與進度記錄。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23073B47'/%3E%3Ccircle cx='32' cy='36' r='16' fill='%23FFC24B'/%3E%3Cpath d='M18 40c5-8 9-12 14-12s9 4 14 12c-4 5-9 8-14 8s-10-3-14-8z' fill='%230E6573'/%3E%3Cpath d='M32 24V12l7 4-7 4' fill='%23FFF8E8'/%3E%3C/svg%3E">
+<style>
+/* ============================================================
+   數字冒險島 — design tokens
+   ============================================================ */
+:root{
+  --ocean-950:#042A33;
+  --ocean-900:#073B47;
+  --ocean-800:#0A4E5C;
+  --ocean-700:#0E6573;
+  --teal:#16A394;
+  --teal-dark:#0B7A72;
+  --teal-deep:#07564F;
+  --mint:#DFF5EE;
+  --mint-2:#EDFAF5;
+  --cream:#FFF8E8;
+  --paper:#FFFCF4;
+  --surface:#FFFFFF;
+  --sand:#F6E3B8;
+  --sand-deep:#E8CE94;
+  --ink:#13343B;
+  --ink-2:#547077;
+  --ink-3:#879A9C;
+  --line:rgba(19,52,59,.12);
+  --line-soft:rgba(19,52,59,.07);
+  --coral:#FF6B4A;
+  --coral-deep:#D9492A;
+  --coral-soft:#FFEDE7;
+  --mango:#FFC24B;
+  --mango-deep:#E8A21E;
+  --leaf:#4FA85E;
+  --leaf-dark:#2F7D3F;
+  --leaf-soft:#E9F7EC;
+  --purple:#7B5CF0;
+  --sky:#3FB6DA;
+  --pink:#FF8FA3;
+  --shadow-sm:0 4px 14px rgba(19,52,59,.06);
+  --shadow:0 12px 30px rgba(19,52,59,.10);
+  --shadow-lg:0 24px 60px rgba(4,42,51,.28);
+  --sans:"PingFang HK","PingFang TC","Noto Sans HK","Noto Sans TC","Microsoft JhengHei",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --round:ui-rounded,"SF Pro Rounded","Hiragino Maru Gothic ProN","PingFang HK",system-ui,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0;
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:15px;
+  line-height:1.45;
+  background:
+    radial-gradient(900px 700px at 18% 12%, rgba(22,163,148,.20), transparent 60%),
+    radial-gradient(800px 600px at 82% 78%, rgba(255,107,74,.16), transparent 62%),
+    radial-gradient(700px 500px at 70% 8%, rgba(255,194,75,.10), transparent 60%),
+    linear-gradient(145deg,#052B34 0%,#073B47 48%,#042A33 100%);
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+button:disabled{cursor:default}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--mango);outline-offset:3px}
+::selection{background:var(--mango);color:var(--ink)}
+h1,h2,h3,p{margin:0}
+svg{display:block}
+.hide{display:none!important}
+
+/* ============================================================
+   Desktop poster / phone shell
+   ============================================================ */
+.poster{
+  position:fixed;inset:0;
+  display:grid;place-items:center;
+  padding:20px;
+}
+.poster::before{
+  content:"＋  −  ×  ÷  √  π  ≠  ∞";
+  position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  font-family:var(--round);
+  font-size:clamp(90px,16vw,230px);
+  font-weight:900;letter-spacing:.14em;
+  color:rgba(255,248,232,.035);
+  white-space:nowrap;pointer-events:none;user-select:none;
+  z-index:0;
+}
+.poster::after{
+  content:"";
+  position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:radial-gradient(rgba(255,248,232,.10) 1px,transparent 1.4px);
+  background-size:26px 26px;
+  mask-image:radial-gradient(80% 70% at 50% 50%,#000 20%,transparent 78%);
+  -webkit-mask-image:radial-gradient(80% 70% at 50% 50%,#000 20%,transparent 78%);
+  opacity:.5;
+}
+.poster-mark{
+  position:absolute;left:max(32px,6vw);top:50%;
+  transform:translateY(-50%);
+  z-index:1;color:rgba(255,248,232,.14);
+  font-size:clamp(56px,6vw,96px);
+  font-weight:900;line-height:.92;letter-spacing:-.04em;
+  user-select:none;pointer-events:none;
+}
+.poster-mark small{
+  display:block;font-size:.2em;letter-spacing:.42em;
+  font-weight:700;margin-top:18px;color:rgba(255,194,75,.42);
+}
+.poster-note{
+  position:absolute;right:max(28px,4vw);bottom:30px;z-index:1;
+  text-align:right;color:rgba(255,248,232,.48);
+  font-size:11px;line-height:1.7;font-weight:600;letter-spacing:.03em;
+}
+.poster-note b{display:block;color:rgba(255,248,232,.8);font-size:12px;letter-spacing:.08em}
+.poster-note i{font-style:normal;color:var(--mango)}
+
+.phone{
+  position:relative;z-index:2;
+  width:390px;height:844px;
+  max-height:calc(100dvh - 40px);
+  border-radius:46px;
+  background:var(--cream);
+  box-shadow:
+    0 0 0 7px #062A32,
+    0 0 0 8.5px rgba(255,248,232,.20),
+    0 44px 90px rgba(0,0,0,.58);
+  overflow:hidden;
+  isolation:isolate;
+}
+.phone::after{
+  content:"";pointer-events:none;position:absolute;inset:0;z-index:100;
+  border-radius:inherit;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.10);
+}
+.app{
+  position:relative;height:100%;width:100%;
+  display:flex;flex-direction:column;
+  background:var(--cream);
+  overflow:hidden;
+  font-variant-numeric:tabular-nums;
+}
+@media (max-width:620px){
+  .poster{padding:0;display:block}
+  .poster-mark,.poster-note,.poster::before{display:none}
+  .phone{width:100%;height:100dvh;max-height:none;border-radius:0;box-shadow:none}
+  .phone::after{border-radius:0}
+}
+@media (max-height:880px) and (min-width:621px){
+  .phone{height:calc(100dvh - 32px);max-height:none;border-radius:40px}
+  .poster-note{bottom:14px}
+}
+@media (max-height:720px) and (min-width:621px){
+  .poster-mark{display:none}
+}
+
+/* ============================================================
+   Shared atoms
+   ============================================================ */
+.scroll{
+  flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+  scrollbar-width:none;-ms-overflow-style:none;
+  padding-bottom:18px;
+}
+.scroll::-webkit-scrollbar{display:none}
+.row{display:flex;align-items:center}
+.grow{flex:1;min-width:0}
+.muted{color:var(--ink-2)}
+.tiny{font-size:10px}
+.eyebrow{
+  font-size:9.5px;font-weight:900;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.svg-i{width:20px;height:20px;flex:none}
+
+/* top bar */
+.topbar{
+  flex:none;display:flex;align-items:center;gap:10px;
+  padding:15px 18px 6px;
+}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand-mark{
+  width:39px;height:39px;border-radius:13px;flex:none;
+  display:grid;place-items:center;color:var(--cream);
+  background:linear-gradient(150deg,var(--teal) 0%,var(--teal-dark) 55%,var(--teal-deep) 100%);
+  box-shadow:0 4px 0 rgba(7,86,79,.28),inset 0 1px 0 rgba(255,255,255,.35);
+}
+.brand-mark svg{width:25px;height:25px}
+.brand-name{font-family:var(--round);font-size:16.5px;font-weight:900;letter-spacing:-.02em;line-height:1.1;white-space:nowrap}
+.brand-name em{
+  display:block;font-family:var(--sans);font-style:normal;
+  font-size:7.5px;letter-spacing:.22em;color:var(--ink-3);
+  font-weight:800;margin-top:4px;
+}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:7px}
+.streak-pill{
+  display:flex;align-items:center;gap:4px;
+  padding:6px 9px 6px 7px;border-radius:999px;
+  background:#fff;border:1px solid var(--line);
+  font-size:11px;font-weight:900;color:var(--ink);
+  box-shadow:var(--shadow-sm);
+}
+.streak-pill svg{width:14px;height:14px;color:var(--coral)}
+.streak-pill b{color:var(--coral-deep)}
+.avatar{
+  width:38px;height:38px;border-radius:50%;flex:none;
+  display:grid;place-items:center;
+  background:linear-gradient(145deg,#FFD97A,var(--mango));
+  color:#5C3A00;font-size:15px;font-weight:900;
+  border:2px solid #fff;
+  box-shadow:0 4px 10px rgba(232,162,30,.28);
+}
+.icon-btn{
+  width:38px;height:38px;border-radius:13px;flex:none;
+  display:grid;place-items:center;
+  background:#fff;border:1px solid var(--line);
+  color:var(--ink);box-shadow:0 2px 0 rgba(19,52,59,.05);
+  transition:transform .15s ease,box-shadow .15s ease;
+}
+.icon-btn:active{transform:translateY(2px);box-shadow:none}
+.icon-btn svg{width:18px;height:18px}
+
+/* tab bar */
+.tabbar{
+  flex:none;z-index:30;
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:4px;padding:7px 10px calc(9px + env(safe-area-inset-bottom));
+  background:rgba(255,252,244,.94);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-top:1px solid var(--line-soft);
+}
+.tab{
+  position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:7px 0 5px;border-radius:15px;
+  color:var(--ink-3);font-size:9.5px;font-weight:800;letter-spacing:.02em;
+  transition:color .18s ease,background .18s ease;
+}
+.tab svg{width:21px;height:21px}
+.tab.active{color:var(--teal-deep);background:var(--mint)}
+.tab.active svg{stroke-width:2.2}
+.tab .badge-dot{
+  position:absolute;top:3px;left:calc(50% + 5px);
+  min-width:15px;height:15px;padding:0 4px;border-radius:999px;
+  display:grid;place-items:center;
+  background:var(--coral);color:#fff;
+  font-size:8px;font-weight:900;border:2px solid var(--paper);
+}
+
+/* generic bits */
+.pill{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:4px 8px;border-radius:999px;
+  font-size:9.5px;font-weight:900;letter-spacing:.02em;
+}
+.star{width:13px;height:13px;flex:none}
+.star.off{opacity:.22}
+.star.on{color:var(--mango)}
+.stars{display:inline-flex;align-items:center;gap:2px}
+
+/* medals */
+.medal{display:inline-block;width:64px;height:64px;flex:none;position:relative}
+.medal svg{width:100%;height:100%;display:block;overflow:visible}
+.medal .m-ribbon{fill:var(--bc);opacity:.92}
+.medal .m-coin{fill:var(--bc)}
+.medal .m-coin-in{fill:var(--cream)}
+.medal .m-icon{fill:none;stroke:var(--bc);stroke-width:5.4;stroke-linecap:round;stroke-linejoin:round}
+.medal.locked{filter:grayscale(1);opacity:.42}
+.medal.small{width:40px;height:40px}
+
+/* ============================================================
+   Home
+   ============================================================ */
+.hero{
+  position:relative;margin:7px 16px 0;
+  min-height:202px;padding:19px 18px 17px;
+  border-radius:30px;overflow:hidden;color:var(--cream);
+  background:
+    radial-gradient(120% 130% at 94% -8%, #16808F 0%, transparent 52%),
+    radial-gradient(90% 100% at 0% 110%, #0B5D6B 0%, transparent 55%),
+    linear-gradient(155deg,#0E6B79 0%,#0A4E5C 54%,#073B47 100%);
+  box-shadow:0 16px 34px rgba(7,59,71,.24),inset 0 1px 0 rgba(255,255,255,.12);
+}
+.hero::before{
+  content:"";position:absolute;inset:0;
+  background-image:radial-gradient(rgba(255,248,232,.12) 1px,transparent 1.3px);
+  background-size:19px 19px;
+  opacity:.35;
+  mask-image:linear-gradient(115deg,#000,transparent 62%);
+  -webkit-mask-image:linear-gradient(115deg,#000,transparent 62%);
+}
+.hero-sun{
+  position:absolute;right:24px;top:-34px;width:118px;height:118px;border-radius:50%;
+  background:radial-gradient(circle at 36% 34%,#FFF3C4 0%,#FFD978 42%,#FFC24B 70%,#F3A92F 100%);
+  box-shadow:0 0 54px rgba(255,194,75,.38);
+  opacity:.96;
+}
+.hero-sun::after{
+  content:"";position:absolute;inset:-20px;border-radius:50%;
+  background:conic-gradient(from 10deg,rgba(255,194,75,.25) 0 3deg,transparent 3deg 16deg);
+  mask-image:radial-gradient(circle,transparent 0 58%,#000 59%);
+  -webkit-mask-image:radial-gradient(circle,transparent 0 58%,#000 59%);
+  animation:spin 40s linear infinite;
+}
+.hero-waves{
+  position:absolute;left:0;right:0;bottom:-1px;width:100%;height:72px;
+  opacity:.9;pointer-events:none;
+}
+.hero-copy{position:relative;z-index:2;width:232px;max-width:232px}
+.hero-date{
+  font-size:10px;font-weight:800;letter-spacing:.14em;
+  color:rgba(255,248,232,.62);
+}
+.hero-title{
+  font-family:var(--round);
+  font-size:26px;font-weight:900;line-height:1.24;
+  letter-spacing:-.03em;margin:7px 0 16px;
+  text-shadow:0 2px 12px rgba(4,42,51,.2);
+}
+.hero-title span{color:var(--mango)}
+.hero-level{display:flex;align-items:center;gap:8px;width:224px;max-width:224px;min-width:0}
+.lvl-chip{
+  flex:none;font-size:9.5px;font-weight:900;letter-spacing:.02em;
+  background:rgba(255,248,232,.15);
+  border:1px solid rgba(255,248,232,.22);
+  border-radius:999px;padding:4px 8px;
+  backdrop-filter:blur(4px);
+}
+.lvl-info{flex:1;min-width:0;overflow:hidden}
+.lvl-info b{display:block;font-size:9px;font-weight:800;color:rgba(255,248,232,.78);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lvl-bar{height:4px;border-radius:99px;background:rgba(255,248,232,.17);overflow:hidden;margin-top:4px}
+.lvl-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--mango),#FFE29A)}
+.lvl-xp{font-size:8.5px;font-weight:800;color:rgba(255,248,232,.5);white-space:nowrap}
+.hero-mascot{
+  position:absolute;right:2px;bottom:-4px;width:132px;height:132px;z-index:1;
+  filter:drop-shadow(0 10px 14px rgba(4,42,51,.28));
+  animation:bob 4.6s ease-in-out infinite;
+  transform-origin:50% 90%;
+}
+.hero-sticker{
+  position:absolute;right:88px;top:60px;z-index:3;
+  background:var(--cream);color:var(--ink);
+  font-size:9px;font-weight:900;padding:6px 9px;border-radius:11px;
+  transform:rotate(-6deg);
+  box-shadow:0 4px 10px rgba(4,42,51,.2);
+}
+.hero-sticker::after{
+  content:"";position:absolute;right:12px;bottom:-5px;
+  width:9px;height:9px;background:var(--cream);
+  transform:rotate(45deg);border-radius:1px;
+}
+
+/* daily quests */
+.quests{
+  margin:12px 16px 0;padding:13px 14px 12px;
+  background:var(--paper);border:1px solid var(--line);
+  border-radius:23px;box-shadow:var(--shadow-sm);
+}
+.quest-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.quest-title{font-size:13px;font-weight:900;letter-spacing:-.01em}
+.quest-reward{
+  display:flex;align-items:center;gap:3px;
+  font-size:9px;font-weight:900;color:var(--mango-deep);
+  background:#FFF6D9;border-radius:999px;padding:4px 7px;
+}
+.quest-count{
+  margin-left:auto;font-size:9.5px;font-weight:900;color:var(--teal-deep);
+  background:var(--mint);padding:4px 8px;border-radius:999px;
+}
+.quest-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.quest{
+  position:relative;background:#fff;border:1px solid var(--line-soft);
+  border-radius:15px;padding:9px 9px 8px;min-width:0;
+}
+.quest-ico{
+  width:25px;height:25px;border-radius:8px;display:grid;place-items:center;
+  background:var(--mint);color:var(--teal-deep);margin-bottom:6px;
+}
+.quest-ico svg{width:14px;height:14px}
+.quest-label{font-size:9.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+.quest-bar{height:4px;border-radius:99px;background:#EFE8D8;overflow:hidden;margin:7px 0 4px}
+.quest-bar i{display:block;height:100%;border-radius:99px;background:var(--teal);transition:width .4s}
+.quest-num{font-size:8.5px;font-weight:800;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.quest.done{background:var(--leaf-soft);border-color:rgba(79,168,94,.22)}
+.quest.done .quest-ico{background:var(--leaf);color:#fff}
+.quest.done .quest-bar i{background:var(--leaf)}
+.quest.done .quest-num{color:var(--leaf-dark)}
+.quest-done-mark{
+  position:absolute;right:7px;top:7px;width:14px;height:14px;border-radius:50%;
+  display:grid;place-items:center;background:var(--leaf);color:#fff;
+}
+.quest-done-mark svg{width:8px;height:8px}
+
+/* map */
+.map-head{
+  display:flex;align-items:flex-end;gap:8px;
+  padding:22px 20px 9px;
+}
+.map-head h2{font-size:20px;font-weight:900;letter-spacing:-.03em;line-height:1}
+.map-head h2 span{font-size:10px;font-weight:800;color:var(--ink-3);letter-spacing:0;margin-left:6px}
+.map-legend{margin-left:auto;font-size:9px;font-weight:800;color:var(--ink-3);display:flex;align-items:center;gap:4px}
+.map-legend svg{width:11px;height:11px;color:var(--mango)}
+.map-wrap{position:relative;margin:0 12px;border-radius:30px;overflow:hidden}
+.map-card{
+  position:relative;height:836px;
+  border-radius:30px;overflow:hidden;
+  border:1px solid rgba(19,52,59,.09);
+  background:
+    radial-gradient(90% 40% at 12% 0%,rgba(255,255,255,.92),transparent 60%),
+    radial-gradient(70% 50% at 92% 22%,rgba(255,255,255,.45),transparent 60%),
+    linear-gradient(178deg,#FCF5E4 0%,#F8ECCE 38%,#F4E3BC 72%,#EFD9A7 100%);
+  box-shadow:inset 0 1px 0 #fff,0 16px 34px rgba(19,52,59,.09);
+}
+.map-card::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:
+    repeating-radial-gradient(ellipse 70% 60% at 86% 6%,transparent 0 26px,rgba(19,52,59,.045) 26px 27px,transparent 27px 52px),
+    repeating-radial-gradient(ellipse 80% 70% at 8% 42%,transparent 0 30px,rgba(19,52,59,.035) 30px 31px,transparent 31px 60px),
+    repeating-radial-gradient(ellipse 60% 50% at 96% 74%,transparent 0 22px,rgba(19,52,59,.03) 22px 23px,transparent 23px 46px);
+  opacity:.9;
+}
+.map-compass{position:absolute;right:18px;top:16px;width:54px;height:54px;opacity:.55;color:var(--ink)}
+.map-start{
+  position:absolute;left:19px;top:22px;
+  font-size:8px;font-weight:900;letter-spacing:.18em;
+  color:var(--ink-2);border:1px dashed rgba(19,52,59,.28);
+  padding:4px 8px;border-radius:7px;transform:rotate(-5deg);
+}
+.map-island-deco{position:absolute;pointer-events:none;opacity:.9}
+.map-path{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.map-nodes{position:absolute;inset:0;z-index:2}
+.node{
+  position:absolute;width:136px;
+  transform:translate(-50%,-42px);
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;
+}
+.node-circle{
+  position:relative;
+  width:84px;height:84px;border-radius:50%;
+  display:grid;place-items:center;color:#fff;
+  background:linear-gradient(155deg,var(--c1),var(--c2));
+  border:4px solid #FFF8E8;
+  box-shadow:
+    0 6px 0 rgba(19,52,59,.22),
+    0 14px 22px rgba(19,52,59,.18),
+    inset 0 2px 0 rgba(255,255,255,.34);
+  transition:transform .18s ease,box-shadow .18s ease;
+}
+.node:hover .node-circle{transform:translateY(-2px)}
+.node:active .node-circle{transform:translateY(3px);box-shadow:0 2px 0 rgba(19,52,59,.22),0 8px 14px rgba(19,52,59,.16),inset 0 2px 0 rgba(255,255,255,.34)}
+.node-icon{width:40px;height:40px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.16))}
+.node-no{
+  position:absolute;left:-6px;top:-4px;
+  width:23px;height:23px;border-radius:50%;
+  display:grid;place-items:center;
+  background:var(--cream);color:var(--ink);
+  border:2px solid var(--ink);
+  font-size:8.5px;font-weight:900;
+  box-shadow:0 2px 0 rgba(19,52,59,.18);
+}
+.node-name{
+  margin-top:7px;font-size:12.5px;font-weight:900;letter-spacing:-.01em;
+  color:var(--ink);text-shadow:0 1px 0 rgba(255,248,232,.8);
+  white-space:nowrap;
+}
+.node-foot{display:flex;align-items:center;gap:3px;margin-top:2px;min-height:14px}
+.node-foot .star{width:11px;height:11px}
+.node-lock{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:8px;font-weight:800;color:#8C826D;
+}
+.node-lock svg{width:9px;height:9px}
+.node-here{
+  position:absolute;top:-29px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:var(--cream);
+  font-size:7.5px;font-weight:900;letter-spacing:.08em;
+  padding:3px 7px;border-radius:999px;white-space:nowrap;
+  animation:floatY 2.6s ease-in-out infinite;
+}
+.node-here::after{
+  content:"";position:absolute;left:50%;bottom:-3px;
+  width:6px;height:6px;background:var(--ink);transform:translateX(-50%) rotate(45deg);
+}
+.node.is-next .node-circle::after{
+  content:"";position:absolute;inset:-11px;border-radius:50%;
+  border:2px dashed rgba(255,107,74,.6);
+  animation:spin 16s linear infinite;
+}
+.node.is-locked{opacity:.98}
+.node.is-locked .node-circle{
+  background:linear-gradient(155deg,#D8D2C2,#BDB6A3);
+  border-color:#F6EFDD;
+  box-shadow:0 4px 0 rgba(19,52,59,.12),inset 0 2px 0 rgba(255,255,255,.3);
+  color:#8C8575;
+}
+.node.is-locked .node-icon{opacity:.7}
+.node.is-locked .node-name{color:#8C826D}
+.node.is-locked .node-no{background:#EFE8D7;border-color:#A99F89;color:#8C826D}
+.map-bottom{
+  position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+  font-size:8px;font-weight:800;letter-spacing:.12em;color:rgba(19,52,59,.32);
+  white-space:nowrap;
+}
+.map-foot{
+  margin:10px 22px 0;display:flex;align-items:center;gap:6px;
+  font-size:9.5px;font-weight:700;color:var(--ink-3);
+}
+.map-foot svg{width:12px;height:12px;color:var(--teal)}
+
+/* ============================================================
+   Overlay / bottom sheet / modal
+   ============================================================ */
+#overlay-root{position:absolute;inset:0;z-index:60;pointer-events:none}
+#overlay-root:empty{display:none}
+.overlay{
+  position:absolute;inset:0;pointer-events:auto;
+  background:rgba(4,42,51,.52);
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  display:flex;align-items:flex-end;
+  animation:fadeIn .2s ease both;
+}
+.overlay.center{align-items:center;justify-content:center;padding:26px}
+.sheet{
+  width:100%;max-height:91%;
+  background:var(--cream);
+  border-radius:30px 30px 0 0;
+  overflow-y:auto;overscroll-behavior:contain;
+  padding-bottom:calc(18px + env(safe-area-inset-bottom));
+  animation:sheetUp .32s cubic-bezier(.22,.9,.24,1) both;
+  scrollbar-width:none;
+}
+.sheet::-webkit-scrollbar{display:none}
+.sheet-hero{
+  position:relative;padding:18px 20px 38px;
+  color:#fff;overflow:hidden;
+  background:
+    radial-gradient(120% 130% at 100% 0%,rgba(255,255,255,.22),transparent 55%),
+    linear-gradient(152deg,var(--c1),var(--c2));
+}
+.sheet-hero::before{
+  content:"";position:absolute;inset:0;
+  background-image:radial-gradient(rgba(255,255,255,.14) 1px,transparent 1.3px);
+  background-size:18px 18px;opacity:.5;
+}
+.sheet-hero::after{
+  content:"";position:absolute;left:-10%;right:-10%;bottom:-38px;height:76px;
+  background:var(--cream);border-radius:50% 50% 0 0;
+}
+.sheet-close{
+  position:absolute;right:14px;top:14px;z-index:3;
+  width:34px;height:34px;border-radius:50%;
+  display:grid;place-items:center;
+  background:rgba(4,42,51,.22);color:#fff;
+  border:1px solid rgba(255,255,255,.25);
+  backdrop-filter:blur(6px);
+}
+.sheet-close svg{width:15px;height:15px}
+.sheet-head{position:relative;z-index:2;display:flex;align-items:center;gap:13px;margin-top:14px}
+.sheet-ico{
+  width:60px;height:60px;border-radius:19px;flex:none;
+  display:grid;place-items:center;
+  background:rgba(255,255,255,.17);
+  border:1px solid rgba(255,255,255,.25);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.25);
+}
+.sheet-ico svg{width:34px;height:34px}
+.sheet-head h2{font-family:var(--round);font-size:23px;font-weight:900;letter-spacing:-.03em;line-height:1.15}
+.sheet-head p{font-size:10.5px;opacity:.78;margin-top:4px;font-weight:600}
+.sheet-starline{display:flex;align-items:center;gap:5px;margin-top:5px;font-size:9px;font-weight:800;opacity:.8}
+.sheet-starline .star{width:11px;height:11px}
+.sheet-body{position:relative;z-index:2;margin-top:-20px;padding:0 16px}
+.sheet-hint{font-size:10px;font-weight:700;color:var(--ink-3);margin:2px 4px 9px;display:flex;align-items:center;gap:5px}
+.sheet-hint svg{width:12px;height:12px}
+.diff{
+  position:relative;width:100%;display:flex;align-items:center;gap:11px;
+  padding:13px 12px 13px 14px;margin-bottom:9px;
+  background:#fff;border:1px solid var(--line);border-radius:20px;
+  box-shadow:0 3px 0 rgba(19,52,59,.04);
+  text-align:left;overflow:hidden;
+  transition:transform .16s ease,box-shadow .16s ease;
+}
+.diff::before{
+  content:"";position:absolute;left:0;top:12px;bottom:12px;width:4px;
+  border-radius:0 4px 4px 0;background:var(--dc);
+}
+.diff:hover{transform:translateY(-1px);box-shadow:0 7px 16px rgba(19,52,59,.08)}
+.diff:active{transform:translateY(1px)}
+.diff-main{min-width:0;flex:1}
+.diff-name{display:flex;align-items:center;gap:6px;font-size:15px;font-weight:900;letter-spacing:-.01em}
+.diff-badge{font-size:7.5px;font-weight:900;letter-spacing:.06em;padding:2px 6px;border-radius:999px;background:var(--ds);color:var(--dc)}
+.diff-meta{font-size:9.5px;color:var(--ink-2);margin-top:3px;font-weight:600}
+.diff-stars{display:flex;align-items:center;gap:2px;margin-top:5px}
+.diff-stars .star{width:11px;height:11px}
+.diff-stars em{font-style:normal;font-size:8px;font-weight:800;color:var(--ink-3);margin-left:4px}
+.diff-play{
+  width:43px;height:43px;border-radius:50%;flex:none;
+  display:grid;place-items:center;
+  background:var(--coral);color:#fff;
+  box-shadow:0 4px 0 var(--coral-deep);
+}
+.diff-play svg{width:17px;height:17px;margin-left:2px}
+.sheet-note{
+  display:flex;align-items:flex-start;gap:7px;
+  font-size:9.5px;line-height:1.55;color:var(--ink-3);
+  padding:6px 5px 0;
+}
+.sheet-note svg{width:12px;height:12px;flex:none;margin-top:1px;color:var(--teal)}
+
+.modal{
+  width:100%;max-width:328px;
+  background:var(--cream);border-radius:26px;
+  padding:24px 22px 20px;text-align:center;
+  box-shadow:0 30px 70px rgba(0,0,0,.35);
+  animation:popIn .24s cubic-bezier(.2,1.2,.4,1) both;
+}
+.modal h3{font-family:var(--round);font-size:20px;font-weight:900;letter-spacing:-.02em;margin-bottom:7px}
+.modal p{font-size:12px;line-height:1.65;color:var(--ink-2);margin-bottom:17px}
+.modal-actions{display:flex;gap:8px}
+.modal-actions .btn{height:46px;font-size:13px}
+.modal .medal{width:104px;height:104px;margin:2px auto 12px}
+.modal .badge-cond{
+  background:#FBF4E3;border:1px dashed var(--sand-deep);
+  border-radius:12px;padding:9px 12px;font-size:10.5px;font-weight:700;
+  color:var(--ink-2);margin-bottom:14px;line-height:1.5;
+}
+.modal .badge-cond b{color:var(--ink)}
+.name-input{
+  width:100%;height:50px;border-radius:14px;
+  border:2px solid var(--line);background:#fff;
+  padding:0 14px;font-size:17px;font-weight:800;
+  font-family:var(--sans);color:var(--ink);text-align:center;
+  margin-bottom:14px;
+}
+.name-input:focus{border-color:var(--teal);outline:none}
+
+/* ============================================================
+   Play
+   ============================================================ */
+.play{height:100%;display:flex;flex-direction:column;background:
+  radial-gradient(80% 40% at 50% 0%,rgba(22,163,148,.09),transparent 70%),
+  radial-gradient(rgba(19,52,59,.035) 1px,transparent 1.35px) 0 0/22px 22px,
+  var(--cream);
+  position:relative;
+}
+.play-top{flex:none;display:flex;align-items:center;gap:9px;padding:14px 16px 4px}
+.play-title{
+  min-width:0;display:flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:900;letter-spacing:-.01em;
+  padding:6px 10px;border-radius:999px;background:#fff;border:1px solid var(--line);
+}
+.play-title .dot{width:7px;height:7px;border-radius:50%;background:var(--c1);flex:none}
+.play-title em{
+  font-style:normal;font-size:8px;font-weight:900;color:#fff;
+  background:var(--coral);padding:2px 6px;border-radius:999px;
+}
+.hearts{margin-left:auto;display:flex;gap:3px;align-items:center}
+.heart{width:17px;height:17px;color:var(--coral);transition:transform .2s,color .2s,opacity .2s}
+.heart.lost{color:#DCD4C2;opacity:.75;transform:scale(.86)}
+.heart.beat{animation:heartBeat .42s ease}
+.seg-row{flex:none;display:flex;gap:5px;padding:7px 18px 0}
+.seg{height:6px;flex:1;border-radius:99px;background:#EBE3D0;overflow:hidden;position:relative}
+.seg i{position:absolute;inset:0;border-radius:99px;background:var(--teal);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.seg.ok i{transform:scaleX(1)}
+.seg.miss i{transform:scaleX(1);background:var(--coral)}
+.seg.cur{background:#F5DCA3;box-shadow:0 0 0 2px rgba(255,194,75,.25)}
+.timer{flex:none;display:flex;align-items:center;gap:8px;padding:9px 18px 0}
+.timer-track{flex:1;height:7px;border-radius:99px;background:#EDE4CF;overflow:hidden}
+.timer-fill{height:100%;width:100%;border-radius:99px;background:linear-gradient(90deg,var(--teal),#54C7A8);transition:width .1s linear}
+.timer-num{font-family:var(--mono);font-size:11px;font-weight:800;color:var(--teal-deep);min-width:30px;text-align:right}
+.timer.warn .timer-fill{background:linear-gradient(90deg,#FF9B4A,var(--coral))}
+.timer.warn .timer-num{color:var(--coral-deep);animation:pulse .8s infinite}
+.play-meta{
+  flex:none;display:flex;align-items:center;justify-content:space-between;
+  padding:9px 20px 0;min-height:26px;
+}
+.qcount{font-size:10px;font-weight:900;color:var(--ink-2);letter-spacing:.05em}
+.combo{
+  display:inline-flex;align-items:center;gap:4px;
+  background:#FFF1CC;color:#8A5B00;
+  font-size:9.5px;font-weight:900;padding:4px 8px;border-radius:999px;
+  opacity:0;transform:translateY(4px);transition:.2s;
+}
+.combo.on{opacity:1;transform:none}
+.combo svg{width:11px;height:11px;color:var(--coral)}
+.play-scroll{flex:1;min-height:0;overflow-y:auto;padding:10px 16px 8px;scrollbar-width:none;display:flex;flex-direction:column}
+.play-scroll::-webkit-scrollbar{display:none}
+.q-card{
+  position:relative;margin:0;
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:26px;
+  padding:19px 17px 17px;
+  box-shadow:0 10px 24px rgba(19,52,59,.06);
+  animation:rise .28s ease both;
+}
+.q-eyebrow{font-size:9px;font-weight:900;letter-spacing:.12em;color:var(--ink-3);display:flex;align-items:center;gap:6px}
+.q-eyebrow b{color:var(--teal-deep);letter-spacing:.02em}
+.q-prompt{
+  line-break:strict;text-wrap:pretty;
+  font-size:22px;font-weight:900;line-height:1.35;letter-spacing:-.02em;
+  margin-top:7px;word-break:break-word;
+}
+.q-prompt.center{text-align:center;font-size:29px;line-height:1.3;letter-spacing:-.01em;font-family:var(--round)}
+.q-prompt.word{font-size:18px;line-height:1.6;letter-spacing:-.01em;font-weight:800}
+.q-prompt .em{color:var(--coral-deep)}
+.q-prompt .num{color:var(--teal-deep)}
+.q-visual{display:flex;justify-content:center;margin:13px -2px 0}
+.viz-svg{width:100%;max-width:306px;height:auto;max-height:196px;overflow:visible}
+.viz-svg text{font-family:var(--sans);font-weight:800;fill:var(--ink)}
+.viz-svg .viz-label{font-size:11.5px;fill:var(--ink-2);font-weight:800}
+.viz-svg .viz-num{font-size:12.5px;fill:var(--ink);font-weight:900}
+.viz-svg .viz-fill{fill:var(--mint)}
+.viz-svg .viz-line{stroke:var(--teal-dark);stroke-width:2.4;fill:none;stroke-linejoin:round}
+.viz-svg .viz-dash{stroke:var(--ink-3);stroke-width:1.6;stroke-dasharray:4 4;fill:none}
+.bars{display:flex;align-items:flex-end;gap:9px;height:150px;padding:18px 8px 0;width:100%;max-width:300px;margin:0 auto}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:5px}
+.bar-val{font-size:10px;font-weight:900;color:var(--ink);font-variant-numeric:tabular-nums}
+.bar-shape{width:100%;max-width:34px;border-radius:7px 7px 3px 3px;background:linear-gradient(180deg,#39C0AE,#169487);box-shadow:inset 0 1px 0 rgba(255,255,255,.4);min-height:4px}
+.bar-col:nth-child(2n) .bar-shape{background:linear-gradient(180deg,#FFD473,#F0AD32)}
+.bar-label{font-size:9.5px;font-weight:800;color:var(--ink-2);white-space:nowrap}
+
+.frac{
+  display:inline-flex;flex-direction:column;align-items:center;
+  vertical-align:middle;line-height:1.02;margin:0 2px;
+  font-family:var(--round);font-size:.86em;font-weight:900;
+}
+.frac .num{padding:0 3px}
+.frac .den{padding:0 3px;border-top:2px solid currentColor;margin-top:1px}
+
+.unk{
+  display:inline-grid;place-items:center;min-width:34px;height:32px;padding:0 6px;
+  border-radius:9px;background:#FFF1CC;border:2px dashed var(--mango-deep);
+  color:var(--coral-deep);font-family:var(--round);font-size:.9em;
+  vertical-align:middle;line-height:1;
+}
+.eqline{
+  display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;
+  font-family:var(--round);font-size:30px;font-weight:900;letter-spacing:.01em;
+  padding:12px 6px 4px;
+}
+.eqline .frac{font-size:1em}
+.eqline .unk{font-size:1em;height:36px;min-width:38px}
+.eqline .x{color:var(--coral-deep)}
+
+.options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.options.cols-3{grid-template-columns:repeat(3,1fr)}
+.opt{
+  position:relative;display:flex;align-items:center;gap:8px;
+  min-height:60px;padding:11px 10px;
+  background:#fff;border:2px solid rgba(19,52,59,.11);
+  border-radius:17px;text-align:left;
+  font-size:18px;font-weight:900;letter-spacing:-.01em;
+  box-shadow:0 3px 0 rgba(19,52,59,.06);
+  transition:transform .14s ease,border-color .14s ease,background .14s ease,box-shadow .14s ease;
+}
+.opt:hover:not(:disabled){border-color:rgba(19,52,59,.24);transform:translateY(-1px)}
+.opt:active:not(:disabled){transform:translateY(2px);box-shadow:none}
+.opt-key{
+  width:24px;height:24px;border-radius:8px;flex:none;
+  display:grid;place-items:center;
+  background:#F4EDDD;color:var(--ink-2);
+  font-size:10px;font-weight:900;
+}
+.opt-body{min-width:0;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.opt.center{justify-content:center;text-align:center;font-size:24px}
+.opt.center .opt-key{position:absolute;left:9px;top:9px}
+.opt.correct{background:var(--leaf-soft);border-color:var(--leaf);box-shadow:0 3px 0 rgba(79,168,94,.22)}
+.opt.correct .opt-key{background:var(--leaf);color:#fff}
+.opt.correct::after{
+  content:"";position:absolute;right:10px;top:50%;width:15px;height:15px;
+  transform:translateY(-50%);
+  background:var(--leaf);border-radius:50%;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 13l4 4L19 7' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/65% no-repeat;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 13l4 4L19 7' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/65% no-repeat;
+}
+.opt.wrong{background:var(--coral-soft);border-color:var(--coral);box-shadow:0 3px 0 rgba(255,107,74,.2);animation:shake .36s ease}
+.opt.wrong .opt-key{background:var(--coral);color:#fff}
+.opt.dim{opacity:.48}
+.opt.wrong::after{
+  content:"";position:absolute;right:10px;top:50%;width:14px;height:14px;
+  transform:translateY(-50%);
+  background:var(--coral);border-radius:50%;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 6l12 12M18 6L6 18' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round'/%3E%3C/svg%3E") center/60% no-repeat;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 6l12 12M18 6L6 18' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round'/%3E%3C/svg%3E") center/60% no-repeat;
+}
+
+.hint-btn{
+  display:flex;align-items:center;gap:5px;
+  margin:13px auto 0;padding:7px 12px;border-radius:999px;
+  background:#F4EDDD;color:var(--ink-2);
+  font-size:10px;font-weight:900;
+}
+.hint-btn svg{width:13px;height:13px;color:var(--mango-deep)}
+.hint-box{
+  margin-top:8px;padding:10px 12px;
+  background:#FFF6D8;border:1px dashed #E5BF5C;border-radius:12px;
+  font-size:11.5px;line-height:1.55;color:#6B5520;font-weight:600;
+  animation:rise .2s ease both;
+}
+.hint-box b{color:#4B3A10}
+
+.answer-display{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  height:76px;margin-top:15px;position:relative;
+  background:#fff;border:2px solid rgba(19,52,59,.13);border-radius:18px;
+  box-shadow:inset 0 2px 6px rgba(19,52,59,.04);
+}
+.answer-value{
+  font-family:var(--round);font-size:36px;font-weight:900;
+  letter-spacing:.01em;line-height:1;color:var(--ink);
+}
+.answer-value.placeholder{color:#D6CEBC;font-size:26px}
+.answer-unit{font-size:13px;font-weight:900;color:var(--ink-2);align-self:flex-end;margin-bottom:19px}
+.answer-del{
+  position:absolute;right:9px;top:50%;transform:translateY(-50%);
+  width:37px;height:37px;border-radius:10px;
+  display:grid;place-items:center;
+  background:#F4EDDD;color:var(--ink-2);
+}
+.answer-del svg{width:17px;height:17px}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px}
+.key{
+  height:50px;border-radius:13px;
+  background:#fff;border:1px solid var(--line);
+  font-family:var(--round);font-size:20px;font-weight:900;
+  box-shadow:0 2px 0 rgba(19,52,59,.07);
+  transition:transform .1s,box-shadow .1s,background .1s;
+}
+.key:hover{background:#FFFDF7}
+.key:active{transform:translateY(2px);box-shadow:none;background:#F7F1E2}
+.key.del{font-size:18px;color:var(--ink-2)}
+.keypad-submit{
+  width:100%;height:50px;margin-top:8px;border-radius:14px;
+  background:var(--coral);color:#fff;font-size:14px;font-weight:900;letter-spacing:.02em;
+  box-shadow:0 4px 0 var(--coral-deep);
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  transition:transform .1s,box-shadow .1s,opacity .1s;
+}
+.keypad-submit:active{transform:translateY(3px);box-shadow:0 1px 0 var(--coral-deep)}
+.keypad-submit:disabled{opacity:.4;box-shadow:0 4px 0 rgba(217,73,42,.4)}
+.keypad-submit svg{width:15px;height:15px}
+
+.feedback{margin-top:15px;border-radius:18px;padding:13px 13px 12px;border:1px solid;animation:rise .24s ease both}
+.feedback.ok{background:var(--leaf-soft);border-color:rgba(79,168,94,.3)}
+.feedback.bad{background:var(--coral-soft);border-color:rgba(255,107,74,.3)}
+.fb-head{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:900}
+.fb-head small{font-size:9px;font-weight:800;color:var(--ink-2);margin-left:auto;letter-spacing:.02em}
+.fb-ico{
+  width:25px;height:25px;border-radius:50%;flex:none;
+  display:grid;place-items:center;background:var(--leaf);color:#fff;
+}
+.feedback.bad .fb-ico{background:var(--coral)}
+.fb-ico svg{width:14px;height:14px}
+.fb-explain{font-size:12.5px;line-height:1.6;color:#4A6461;margin:8px 0 11px;font-weight:500}
+.feedback.ok .fb-explain{color:#3F6448}
+.fb-explain b{color:var(--ink);font-weight:900}
+.fb-explain .frac{font-size:1em}
+.fb-btn{
+  width:100%;height:47px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  background:var(--teal-dark);color:#fff;font-size:13.5px;font-weight:900;
+  box-shadow:0 4px 0 var(--teal-deep);
+}
+.feedback.bad .fb-btn{background:var(--coral);box-shadow:0 4px 0 var(--coral-deep)}
+.fb-btn svg{width:15px;height:15px}
+.fb-btn:active{transform:translateY(2px);box-shadow:none}
+
+/* ============================================================
+   Result
+   ============================================================ */
+.result{height:100%;overflow-y:auto;background:var(--cream);scrollbar-width:none}
+.result::-webkit-scrollbar{display:none}
+.res-hero{
+  position:relative;overflow:hidden;
+  padding:22px 20px 56px;text-align:center;color:var(--cream);
+  background:
+    radial-gradient(100% 90% at 50% 0%,#12818C 0%,transparent 62%),
+    linear-gradient(170deg,#0D6B79 0%,#0A4E5C 55%,#073B47 100%);
+  border-radius:0 0 34px 34px;
+}
+.res-hero.fail{
+  background:
+    radial-gradient(100% 90% at 50% 0%,#8C6A50 0%,transparent 62%),
+    linear-gradient(170deg,#5F4939 0%,#3D3028 100%);
+}
+.res-rays{
+  position:absolute;left:50%;top:42%;width:900px;height:900px;
+  transform:translate(-50%,-50%);
+  background:repeating-conic-gradient(from 0deg,rgba(255,248,232,.075) 0deg 7deg,transparent 7deg 18deg);
+  animation:spin 60s linear infinite;
+  pointer-events:none;
+}
+.res-close{position:absolute;right:14px;top:14px;z-index:3;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);color:#fff}
+.res-eyebrow{position:relative;font-size:9.5px;font-weight:800;letter-spacing:.16em;color:rgba(255,248,232,.6)}
+.res-stars{position:relative;display:flex;justify-content:center;align-items:flex-end;gap:7px;margin:12px 0 3px;height:66px}
+.res-star{width:58px;height:58px;color:rgba(255,248,232,.16)}
+.res-star:nth-child(2){width:66px;height:66px;margin-bottom:5px}
+.res-star.on{color:#FFD25E;filter:drop-shadow(0 8px 16px rgba(255,194,75,.35));animation:starPop .55s cubic-bezier(.2,1.4,.4,1) both}
+.res-star:nth-child(1).on{animation-delay:.05s}
+.res-star:nth-child(2).on{animation-delay:.16s}
+.res-star:nth-child(3).on{animation-delay:.27s}
+.res-title{position:relative;font-family:var(--round);font-size:28px;font-weight:900;letter-spacing:-.03em;margin-top:2px}
+.res-sub{position:relative;font-size:11px;font-weight:700;color:rgba(255,248,232,.62);margin-top:5px}
+.res-mascot{position:absolute;left:4px;bottom:30px;width:90px;height:90px;transform:rotate(-6deg);filter:drop-shadow(0 8px 10px rgba(0,0,0,.2))}
+.res-panel{
+  position:relative;z-index:2;margin:-32px 14px 22px;
+  background:var(--paper);border:1px solid var(--line);
+  border-radius:26px;padding:16px 16px 18px;
+  box-shadow:0 18px 36px rgba(19,52,59,.12);
+}
+.res-xp{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  height:42px;border-radius:13px;background:#FFF2E9;
+  color:var(--coral-deep);font-size:14px;font-weight:900;letter-spacing:.01em;
+  margin-bottom:13px;
+}
+.res-xp svg{width:17px;height:17px}
+.res-xp small{font-size:9px;font-weight:800;color:#B06C54;letter-spacing:.04em}
+.res-xp .bonus{font-size:8.5px;background:#fff;border-radius:999px;padding:3px 6px;color:var(--mango-deep)}
+.res-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.res-stat{background:#FBF5E7;border-radius:14px;padding:9px 4px 8px;text-align:center}
+.res-stat b{display:block;font-family:var(--round);font-size:18px;font-weight:900;letter-spacing:-.02em}
+.res-stat span{display:block;font-size:8.5px;font-weight:800;color:var(--ink-2);margin-top:2px}
+.res-stat b small{font-size:10px;font-weight:800;color:var(--ink-3);letter-spacing:0}
+.res-sec{font-size:9.5px;font-weight:900;letter-spacing:.1em;color:var(--ink-3);margin:15px 2px 8px;display:flex;align-items:center;gap:6px}
+.res-sec::after{content:"";flex:1;height:1px;background:var(--line-soft)}
+.res-badges{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.res-badges::-webkit-scrollbar{display:none}
+.res-badge{
+  display:flex;align-items:center;gap:7px;flex:none;
+  padding:7px 9px 7px 7px;border-radius:14px;
+  background:#FFF7DF;border:1px solid #F1D893;
+}
+.res-badge .medal{width:36px;height:36px}
+.res-badge b{display:block;font-size:10px;font-weight:900;line-height:1.2}
+.res-badge span{display:block;font-size:8px;color:#9A7B36;font-weight:700;margin-top:2px}
+.res-unlock{
+  display:flex;align-items:center;gap:9px;
+  background:var(--mint);border:1px solid rgba(22,163,148,.22);
+  border-radius:14px;padding:9px 11px;margin-top:10px;
+  font-size:10px;font-weight:800;color:var(--teal-deep);
+}
+.res-unlock .ico{width:28px;height:28px;border-radius:9px;background:var(--teal);color:#fff;display:grid;place-items:center;flex:none}
+.res-unlock .ico svg{width:16px;height:16px}
+.res-unlock b{display:block;font-size:11px}
+.res-actions{margin-top:16px}
+.btn{
+  width:100%;height:51px;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  font-size:14px;font-weight:900;letter-spacing:.01em;
+  transition:transform .12s,box-shadow .12s;
+}
+.btn svg{width:16px;height:16px}
+.btn:active{transform:translateY(2px)}
+.btn.primary{background:var(--coral);color:#fff;box-shadow:0 5px 0 var(--coral-deep)}
+.btn.primary:active{box-shadow:0 2px 0 var(--coral-deep)}
+.btn.secondary{background:#fff;color:var(--ink);border:2px solid var(--line);box-shadow:0 3px 0 rgba(19,52,59,.05)}
+.btn.tertiary{background:transparent;color:var(--ink-2);height:42px;font-size:12px}
+.btn + .btn{margin-top:8px}
+.btn:disabled{opacity:.5}
+.res-note{text-align:center;font-size:9px;color:var(--ink-3);margin-top:10px;font-weight:600}
+
+/* ============================================================
+   Mistakes
+   ============================================================ */
+.page-head{display:flex;align-items:flex-end;gap:9px;padding:11px 20px 0}
+.page-head h1{font-family:var(--round);font-size:27px;font-weight:900;letter-spacing:-.03em;line-height:1.05}
+.page-head .sub{font-size:9.5px;font-weight:700;color:var(--ink-3);margin-bottom:3px}
+.train-btn{
+  margin-left:auto;flex:none;
+  display:flex;align-items:center;gap:5px;
+  padding:9px 12px;border-radius:999px;
+  background:var(--coral);color:#fff;
+  font-size:10px;font-weight:900;
+  box-shadow:0 3px 0 var(--coral-deep);
+}
+.train-btn svg{width:12px;height:12px}
+.train-btn:active{transform:translateY(2px);box-shadow:none}
+.filter-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:13px 18px 5px}
+.filter-row::-webkit-scrollbar{display:none}
+.chip{
+  width:100%;padding:7px 4px;border-radius:999px;text-align:center;white-space:nowrap;overflow:hidden;
+  background:#fff;border:1px solid var(--line);
+  font-size:10px;font-weight:800;color:var(--ink-2);
+  transition:.16s;
+}
+.chip.active{background:var(--ink);border-color:var(--ink);color:var(--cream)}
+.chip .n{opacity:.55;font-size:9px;margin-left:2px}
+.mistake-list{padding:8px 16px 18px;display:flex;flex-direction:column;gap:9px}
+.mistake{
+  background:var(--paper);border:1px solid var(--line);
+  border-radius:19px;padding:13px 13px 12px;
+  animation:rise .25s ease both;
+  transition:opacity .25s,transform .25s;
+}
+.mistake.mastering{opacity:0;transform:translateX(20px)}
+.m-top{display:flex;align-items:center;gap:6px;margin-bottom:7px;min-width:0}
+.m-island{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:3px 7px 3px 5px;border-radius:999px;
+  font-size:8.5px;font-weight:900;color:var(--ic,#0B7A72);
+  background:var(--ib,#DFF5EE);
+}
+.m-island svg{width:10px;height:10px}
+.m-diff{font-size:8px;font-weight:800;color:var(--ink-3);padding:3px 0}
+.m-date{margin-left:auto;font-size:8px;color:var(--ink-3);font-weight:600;white-space:nowrap}
+.m-q{font-size:13.5px;font-weight:800;line-height:1.5;letter-spacing:-.01em;margin-bottom:9px;line-break:strict;text-wrap:pretty}
+.m-q .frac{font-size:.95em}
+.m-answers{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.m-ans{border-radius:10px;padding:6px 8px;font-size:10.5px;font-weight:800;background:var(--coral-soft);color:#AE3B24;border:1px solid rgba(255,107,74,.16);min-width:0}
+.m-ans.good{background:var(--leaf-soft);color:var(--leaf-dark);border-color:rgba(79,168,94,.18)}
+.m-ans em{display:block;font-style:normal;font-size:7.5px;font-weight:900;opacity:.65;letter-spacing:.04em;margin-bottom:1px}
+.m-ans .frac{font-size:1em}
+.m-explain{
+  display:none;margin-top:9px;
+  background:#FAF4E4;border-radius:11px;padding:9px 11px;
+  font-size:11px;line-height:1.55;color:#5E6657;
+}
+.mistake.open .m-explain{display:block;animation:rise .2s both}
+.m-explain b{color:var(--ink)}
+.m-explain .frac{font-size:1em}
+.m-actions{display:flex;gap:6px;margin-top:9px}
+.m-actions .mini{
+  flex:1;height:35px;border-radius:10px;
+  border:1px solid var(--line);background:#fff;
+  font-size:10px;font-weight:900;color:var(--ink-2);
+  display:flex;align-items:center;justify-content:center;gap:4px;
+}
+.m-actions .mini svg{width:12px;height:12px}
+.m-actions .mini.solid{background:var(--teal-dark);border-color:var(--teal-dark);color:#fff}
+.m-actions .mini.green{background:var(--leaf-soft);border-color:rgba(79,168,94,.28);color:var(--leaf-dark)}
+.empty{
+  margin:16px 16px;padding:30px 22px 26px;text-align:center;
+  background:var(--paper);border:1px dashed var(--line);
+  border-radius:24px;
+}
+.empty svg{width:96px;height:96px;margin:0 auto 8px}
+.empty h3{font-size:16px;font-weight:900;margin-bottom:4px}
+.empty p{font-size:10.5px;line-height:1.6;color:var(--ink-2);max-width:230px;margin:0 auto}
+.mastered-note{
+  margin:0 18px 6px;padding:9px 12px;
+  display:flex;align-items:center;gap:6px;
+  background:var(--mint-2);border-radius:12px;
+  font-size:9.5px;font-weight:800;color:var(--teal-deep);
+}
+.mastered-note svg{width:12px;height:12px}
+
+/* ============================================================
+   Badges
+   ============================================================ */
+.badge-summary{
+  margin:11px 16px 2px;padding:14px 15px;
+  display:flex;align-items:center;gap:12px;
+  border-radius:20px;color:var(--cream);
+  background:
+    radial-gradient(100% 130% at 100% 0%,rgba(255,255,255,.16),transparent 55%),
+    linear-gradient(140deg,var(--ocean-700),var(--ocean-900));
+  box-shadow:0 10px 22px rgba(7,59,71,.18);
+  position:relative;overflow:hidden;
+}
+.badge-summary::after{
+  content:"";position:absolute;right:-20px;bottom:-40px;width:120px;height:120px;
+  border-radius:50%;border:16px solid rgba(255,248,232,.06);
+}
+.badge-summary .n{font-family:var(--round);font-size:27px;font-weight:900;line-height:1;letter-spacing:-.03em}
+.badge-summary .n small{font-size:12px;opacity:.5;font-weight:800}
+.badge-summary .t{font-size:10px;font-weight:700;opacity:.7;margin-top:3px}
+.badge-prog{height:6px;border-radius:99px;background:rgba(255,248,232,.16);overflow:hidden;margin-top:6px}
+.badge-prog i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--mango),#FFE29A)}
+.badge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 16px 20px}
+.badge-tile{
+  position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding:12px 5px 9px;min-height:124px;
+  background:var(--paper);border:1px solid var(--line);border-radius:17px;
+  transition:transform .16s,box-shadow .16s;
+  overflow:hidden;
+}
+.badge-tile:active{transform:scale(.98)}
+.badge-tile .medal{width:56px;height:56px}
+.badge-tile b{font-size:9.5px;font-weight:900;text-align:center;line-height:1.3;letter-spacing:-.01em}
+.badge-tile span{font-size:7.5px;font-weight:700;color:var(--ink-3);text-align:center;line-height:1.3}
+.badge-tile.locked{background:#F7F0DF;border-style:dashed;border-color:rgba(19,52,59,.12)}
+.badge-tile.locked b{color:#958B77}
+.badge-tile.earned::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(60% 45% at 50% 24%,rgba(255,194,75,.17),transparent 70%);
+}
+.badge-tile .spark{position:absolute;right:9px;top:9px;color:var(--mango);opacity:.9}
+.badge-tile .spark svg{width:10px;height:10px}
+
+/* ============================================================
+   Progress
+   ============================================================ */
+.profile-card{
+  position:relative;margin:11px 16px 0;padding:17px;
+  border-radius:24px;color:var(--cream);overflow:hidden;
+  background:
+    radial-gradient(100% 130% at 100% 0%,rgba(255,255,255,.14),transparent 55%),
+    linear-gradient(145deg,#0E6573 0%,#0A4E5C 55%,#073B47 100%);
+  box-shadow:0 12px 26px rgba(7,59,71,.2);
+}
+.profile-card::before{
+  content:"";position:absolute;right:-24px;bottom:-54px;width:150px;height:150px;
+  border-radius:50%;border:20px solid rgba(255,248,232,.055);
+}
+.profile-top{display:flex;align-items:center;gap:11px;position:relative;z-index:1}
+.profile-avatar{
+  width:52px;height:52px;border-radius:17px;flex:none;
+  display:grid;place-items:center;
+  background:linear-gradient(145deg,#FFDE8F,var(--mango));
+  color:#5A3A00;font-size:21px;font-weight:900;
+  border:2px solid rgba(255,255,255,.3);
+  box-shadow:0 4px 10px rgba(0,0,0,.15);
+}
+.profile-name{font-family:var(--round);font-size:18px;font-weight:900;letter-spacing:-.02em;line-height:1.15}
+.profile-rank{font-size:9px;font-weight:800;color:rgba(255,248,232,.62);margin-top:3px;letter-spacing:.04em}
+.edit-name{
+  margin-left:auto;width:30px;height:30px;border-radius:10px;flex:none;
+  display:grid;place-items:center;
+  background:rgba(255,248,232,.1);border:1px solid rgba(255,248,232,.16);
+  color:rgba(255,248,232,.8);
+}
+.edit-name svg{width:13px;height:13px}
+.profile-xp{position:relative;z-index:1;margin-top:14px}
+.profile-xp .top{display:flex;align-items:center;justify-content:space-between;font-size:8.5px;font-weight:800;color:rgba(255,248,232,.7);margin-bottom:5px}
+.profile-xp .top b{color:var(--mango)}
+.profile-bar{height:6px;border-radius:99px;background:rgba(255,248,232,.15);overflow:hidden}
+.profile-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--mango),#FFE7A8);box-shadow:0 0 10px rgba(255,194,75,.4)}
+.profile-foot{position:relative;z-index:1;display:flex;align-items:center;gap:5px;margin-top:10px;font-size:8.5px;font-weight:800;color:rgba(255,248,232,.62)}
+.profile-foot svg{width:11px;height:11px;color:var(--mango)}
+
+.panel{
+  margin:11px 16px 0;padding:14px;
+  background:var(--paper);border:1px solid var(--line);
+  border-radius:22px;box-shadow:var(--shadow-sm);
+}
+.panel-title{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:900;margin-bottom:11px;letter-spacing:-.01em}
+.panel-title svg{width:14px;height:14px;color:var(--teal-dark)}
+.panel-title .hint{margin-left:auto;font-size:8.5px;font-weight:700;color:var(--ink-3)}
+.stage-seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#F3ECDC;border-radius:13px;padding:4px}
+.stage-seg button{
+  height:37px;border-radius:10px;font-size:11px;font-weight:900;color:var(--ink-2);
+  display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.stage-seg button.active{background:#fff;color:var(--ink);box-shadow:0 2px 6px rgba(19,52,59,.09)}
+.stage-note{font-size:8.5px;color:var(--ink-3);font-weight:600;margin-top:8px;line-height:1.5;display:flex;gap:5px}
+.stage-note svg{width:11px;height:11px;flex:none;margin-top:1px}
+
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.stat-box{background:#FBF5E7;border-radius:14px;padding:10px 11px}
+.stat-box .k{font-size:8.5px;font-weight:800;color:var(--ink-3);display:flex;align-items:center;gap:4px}
+.stat-box .k svg{width:11px;height:11px}
+.stat-box .v{font-family:var(--round);font-size:20px;font-weight:900;margin-top:3px;letter-spacing:-.02em}
+.stat-box .v small{font-size:9px;color:var(--ink-3);font-weight:800;margin-left:2px;letter-spacing:0}
+
+.week-chart{display:flex;align-items:flex-end;gap:6px;height:118px;padding-top:4px}
+.wbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px;min-width:0}
+.wbar .v{font-size:8px;font-weight:800;color:var(--ink-3);height:10px}
+.wbar .shape{width:100%;max-width:26px;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,#B9E7DD,#8FD5C8);min-height:4px;transition:height .4s}
+.wbar.today .shape{background:linear-gradient(180deg,#2CBBA9,var(--teal))}
+.wbar.today .d{color:var(--teal-deep);font-weight:900}
+.wbar .d{font-size:8px;font-weight:700;color:var(--ink-3)}
+.week-foot{display:flex;justify-content:space-between;font-size:8.5px;font-weight:700;color:var(--ink-3);margin-top:8px;padding-top:8px;border-top:1px dashed var(--line-soft)}
+.week-foot b{color:var(--ink-2)}
+
+.mastery-list{display:flex;flex-direction:column;gap:9px}
+.mastery{display:flex;align-items:center;gap:9px}
+.mastery-ico{width:29px;height:29px;border-radius:10px;flex:none;display:grid;place-items:center;color:#fff;background:linear-gradient(150deg,var(--c1),var(--c2))}
+.mastery-ico svg{width:16px;height:16px}
+.mastery-main{flex:1;min-width:0}
+.mastery-top{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:9.5px;font-weight:900;margin-bottom:4px}
+.mastery-top span{font-size:8px;color:var(--ink-3);font-weight:700}
+.mastery-bar{height:5px;border-radius:99px;background:#F0E8D7;overflow:hidden}
+.mastery-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--teal),#63D3BF)}
+.mastery-stars{flex:none;display:flex;gap:1px;width:36px;justify-content:flex-end}
+.mastery-stars .star{width:10px;height:10px}
+.mastery.locked{opacity:.5}
+
+.settings-list{display:flex;flex-direction:column}
+.setting{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line-soft)}
+.setting:last-child{border-bottom:0;padding-bottom:2px}
+.setting-ico{width:29px;height:29px;border-radius:9px;background:#F4EDDD;display:grid;place-items:center;color:var(--ink-2);flex:none}
+.setting-ico svg{width:14px;height:14px}
+.setting-t{font-size:10.5px;font-weight:900}
+.setting-s{font-size:8px;color:var(--ink-3);font-weight:600;margin-top:1px}
+.switch{
+  margin-left:auto;width:41px;height:24px;border-radius:99px;
+  background:#DED6C4;position:relative;flex:none;transition:background .2s;
+}
+.switch::after{
+  content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s;
+}
+.switch.on{background:var(--teal)}
+.switch.on::after{transform:translateX(17px)}
+.reset-btn{margin-left:auto;font-size:9px;font-weight:900;color:var(--coral-deep);background:var(--coral-soft);padding:7px 10px;border-radius:9px}
+.privacy-note{
+  display:flex;align-items:flex-start;gap:6px;
+  margin:14px 22px 24px;font-size:8.5px;line-height:1.6;color:var(--ink-3);font-weight:600;
+}
+.privacy-note svg{width:12px;height:12px;flex:none;margin-top:1px;color:var(--teal)}
+
+/* ============================================================
+   Toast / confetti / motion
+   ============================================================ */
+.toast-root{
+  position:absolute;left:0;right:0;bottom:92px;z-index:90;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  pointer-events:none;padding:0 20px;
+}
+.toast{
+  background:rgba(19,52,59,.94);color:var(--cream);
+  font-size:10.5px;font-weight:800;line-height:1.4;
+  padding:9px 14px;border-radius:999px;
+  box-shadow:0 10px 24px rgba(4,42,51,.28);
+  animation:toastIn .26s cubic-bezier(.2,1.2,.4,1) both;
+  max-width:100%;text-align:center;
+}
+.toast.leaving{animation:toastOut .24s ease both}
+.fx-root{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.confetti{
+  position:absolute;top:-14px;width:7px;height:11px;border-radius:2px;
+  animation:confettiFall var(--dur) cubic-bezier(.25,.6,.5,1) forwards;
+  animation-delay:var(--delay);
+  transform:rotate(var(--rot));
+}
+.play-buddy{display:flex;align-items:flex-end;gap:9px;margin-top:auto;padding:18px 8px 2px;opacity:.96}
+.play.input-mode .play-buddy{display:none}
+.play-buddy .mascot{width:76px;height:76px;flex:none;filter:drop-shadow(0 8px 10px rgba(19,52,59,.12));transform:rotate(-4deg)}
+.buddy-bubble{position:relative;background:#fff;border:1px solid var(--line);border-radius:15px 15px 15px 4px;padding:9px 12px;font-size:10px;font-weight:700;color:var(--ink-2);line-height:1.55;box-shadow:var(--shadow-sm);margin-bottom:9px;max-width:210px}
+.buddy-bubble::after{content:"";position:absolute;left:-5px;bottom:7px;width:9px;height:9px;background:#fff;border-left:1px solid var(--line);border-bottom:1px solid var(--line);transform:rotate(45deg)}
+.play-doodle{position:absolute;z-index:0;font-family:var(--round);font-weight:900;color:var(--teal-dark);opacity:.035;pointer-events:none;user-select:none;line-height:1}
+.play-top,.seg-row,.timer,.play-meta,.play-scroll,.play-foot{position:relative;z-index:1}
+.play-foot{flex:none;display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 22px calc(10px + env(safe-area-inset-bottom));font-size:9px;font-weight:700;color:var(--ink-3);text-align:center;line-height:1.45}
+.play-foot svg{color:var(--mango-deep);flex:none}
+@keyframes confettiFall{
+  0%{opacity:1;transform:translate3d(0,0,0) rotate(var(--rot))}
+  100%{opacity:.85;transform:translate3d(var(--drift),900px,0) rotate(calc(var(--rot) + 640deg))}
+}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-7px) rotate(1.5deg)}}
+@keyframes floatY{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-4px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+@keyframes starPop{0%{opacity:0;transform:scale(.2) rotate(-30deg)}70%{opacity:1;transform:scale(1.18) rotate(4deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+@keyframes heartBeat{0%,100%{transform:scale(1)}35%{transform:scale(1.35)}70%{transform:scale(.9)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateY(6px)}}
+.app.no-motion *, .app.no-motion *::before, .app.no-motion *::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+}
+
+/* small screens */
+@media (max-width:360px){
+  .hero-title{font-size:23px}
+  .hero-copy{max-width:210px}
+  .hero-mascot{width:118px;height:118px;right:-6px}
+  .hero-sticker{display:none}
+  .q-prompt{font-size:20px}
+  .q-prompt.center{font-size:26px}
+  .node{width:122px}
+}
+
+/* result star sizing (svg children need to fill the animated span) */
+.res-star .star,.res-star .svg-i{width:100%;height:100%}
+.res-star{display:inline-flex;align-items:center;justify-content:center}
+
+</style>
+</head>
+<body>
+<div class="poster">
+  <div class="poster-mark" aria-hidden="true">數字<br>冒險島<small>NUMBER ISLAND</small></div>
+  <main class="phone" id="phone">
+    <div class="app" id="app"></div>
+    <div id="overlay-root"></div>
+    <div id="toast-root" class="toast-root" aria-live="polite"></div>
+    <div id="fx-root" class="fx-root"></div>
+  </main>
+  <aside class="poster-note">
+    <b>數字冒險島 · 互動原型</b>
+    六個島嶼 × 三種難度 × 十四枚徽章<br>
+    所有進度只存喺你部裝置 · <i>玩住練數學</i>
+  </aside>
+</div>
+<script>
+'use strict';
+/* =========================================================
+   數字冒險島 — interactive prototype
+   Single file build · offline · localStorage
+   ========================================================= */
+
+const SAVE_KEY = 'number-adventure-island.v1';
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+/* ---------- island / difficulty metadata ---------- */
+const ISLANDS = [
+  {
+    id:'volcano', name:'火山速算島', short:'火山速算', topic:'四則運算',
+    c1:'#FF9A63', c2:'#E5432B', accent:'#FFC24B', icon:'volcano',
+    tagline:'手快心準，連熔岩都追你唔到。',
+    desc:'加減乘除、混合運算同百分比，限時挑戰你嘅反應同準確度。'
+  },
+  {
+    id:'fraction', name:'分數叢林', short:'分數叢林', topic:'分數',
+    c1:'#6BD185', c2:'#2E8B4F', accent:'#FFE08A', icon:'leaf',
+    tagline:'切開一片森林，睇清每份有幾多。',
+    desc:'比較、等值、加減同乘法，用視覺分數條建立真正嘅分數感。'
+  },
+  {
+    id:'geometry', name:'圖形海灣', short:'圖形海灣', topic:'圖形與度量',
+    c1:'#4CC3E6', c2:'#147FA8', accent:'#FFE08A', icon:'shell',
+    tagline:'量度海岸線，搵出圖形嘅秘密。',
+    desc:'周界、面積、體積同角度，附圖解，唔需要死記公式。'
+  },
+  {
+    id:'word', name:'應用題沙漠', short:'應用題', topic:'應用題',
+    c1:'#F7C756', c2:'#D68B1C', accent:'#FFF0B8', icon:'cactus',
+    tagline:'讀懂故事，先至搵到答案。',
+    desc:'購物、速度、平均數同百分比，一步步拆解生活情境。'
+  },
+  {
+    id:'algebra', name:'方程山洞', short:'方程山洞', topic:'代數',
+    c1:'#9B7DF8', c2:'#5B3FC4', accent:'#FFE08A', icon:'crystal',
+    tagline:'解開石門上嘅未知數。',
+    desc:'由找未知數到一元一次方程，練習逆向思考同平衡兩邊。'
+  },
+  {
+    id:'data', name:'數據燈塔', short:'數據燈塔', topic:'數據與概率',
+    c1:'#3FC8B4', c2:'#0B7A72', accent:'#FFE08A', icon:'lighthouse',
+    tagline:'喺數據海上面，搵到方向。',
+    desc:'讀圖表、平均數、中位數同概率，令數字講出故事。'
+  }
+];
+
+const DIFFS = [
+  { id:1, name:'探索', tag:'熱身', color:'#0B7A72', soft:'#DFF5EE',
+    meta:'6 題 · 約 3 分鐘', count:6, desc:'啱啱開始，慢慢建立信心' },
+  { id:2, name:'挑戰', tag:'推薦', color:'#C48412', soft:'#FFF2CC',
+    meta:'8 題 · 約 4 分鐘', count:8, desc:'混合題型，真正考驗實力' },
+  { id:3, name:'極限', tag:'高手', color:'#D9492A', soft:'#FFE3DB',
+    meta:'8 題 · 約 5 分鐘', count:8, desc:'進階題目，挑戰更高星數' }
+];
+
+const LEVELS = [0, 300, 700, 1200, 1800, 2500, 3300, 4200, 5200, 6400, 7800, 9200, 10800];
+const RANKS = ['見習探險家','見習探險家','島嶼嚮導','島嶼嚮導','數學船長','數學船長','傳說航海家','傳說航海家','群島守護者','群島守護者'];
+
+const BADGES = [
+  { id:'first',    name:'初次登島',   desc:'完成你嘅第一次冒險。',                 hint:'完成任何一個關卡',      color:'#16A394', icon:'flag',
+    test:() => S.stats.runs >= 1 },
+  { id:'perfect',  name:'完美通關',   desc:'一次冒險入面答啱晒所有題目。',         hint:'0 失誤完成一關',        color:'#E8A21E', icon:'star',
+    test:() => S.stats.perfectRuns >= 1 },
+  { id:'combo',    name:'連擊高手',   desc:'一口氣連續答啱 10 題。',               hint:'連擊達 10',            color:'#F2683F', icon:'bolt',
+    test:() => S.stats.bestCombo >= 10 },
+  { id:'speedy',   name:'閃電快手',   desc:'喺火山速算島攞到 3 星。',              hint:'火山速算 3 星',        color:'#E5432B', icon:'clock',
+    test:() => bestStars('volcano') >= 3 },
+  { id:'fraction', name:'分數大師',   desc:'喺分數叢林嘅極限難度攞到 3 星。',      hint:'分數叢林 · 極限 3 星', color:'#2E8B4F', icon:'leaf',
+    test:() => S.islands.fraction.stars[3] >= 3 },
+  { id:'geometry', name:'圖形之眼',   desc:'喺圖形海灣嘅極限難度攞到 3 星。',      hint:'圖形海灣 · 極限 3 星', color:'#147FA8', icon:'shapes',
+    test:() => S.islands.geometry.stars[3] >= 3 },
+  { id:'word',     name:'應用題偵探', desc:'喺應用題沙漠嘅極限難度攞到 3 星。',    hint:'應用題沙漠 · 極限 3 星',color:'#B87712', icon:'compass',
+    test:() => S.islands.word.stars[3] >= 3 },
+  { id:'algebra',  name:'方程忍者',   desc:'喺方程山洞嘅極限難度攞到 3 星。',      hint:'方程山洞 · 極限 3 星', color:'#5B3FC4', icon:'gem',
+    test:() => S.islands.algebra.stars[3] >= 3 },
+  { id:'data',     name:'數據分析師', desc:'喺數據燈塔嘅極限難度攞到 3 星。',      hint:'數據燈塔 · 極限 3 星', color:'#0B7A72', icon:'chart',
+    test:() => S.islands.data.stars[3] >= 3 },
+  { id:'mistakes', name:'錯題清零',   desc:'將 10 道錯題重新掌握。',               hint:'掌握 10 道錯題',       color:'#4FA85E', icon:'check',
+    test:() => masteredCount() >= 10 },
+  { id:'streak',   name:'七日探險家', desc:'連續七日登島練習。',                   hint:'連續 7 日',            color:'#F2683F', icon:'flame',
+    test:() => S.player.streak >= 7 },
+  { id:'hundred',  name:'百題勇士',   desc:'累計答對 100 道題目。',                 hint:'累計答對 100 題',      color:'#0A4E5C', icon:'book',
+    test:() => S.stats.correct >= 100 },
+  { id:'islands',  name:'群島之主',   desc:'六個島嶼都至少攞到 2 星。',            hint:'六島各 2 星',          color:'#C48412', icon:'crown',
+    test:() => ISLANDS.every(i => bestStars(i.id) >= 2) },
+  { id:'comeback', name:'逆轉勝',     desc:'失敗之後，喺同一關攞返 3 星。',        hint:'失敗後再攞 3 星',      color:'#7B5CF0', icon:'mountain',
+    test:() => S.stats.comeback >= 1 }
+];
+
+/* compact icon library */
+const ICONS = {
+  island:'<path d="M3 18.5h18"/><path d="M5.2 18.5c1.3-4.8 4-7.2 6.8-7.2s5.5 2.4 6.8 7.2"/><path d="M12 11.3V5.5"/><path d="M12 6.4c2.5 0 4.2-1.3 4.2-3.2-2.5 0-4.2 1.3-4.2 3.2z"/><path d="M9.2 21h5.6"/>',
+  flame:'<path d="M12 21c-3.8 0-6.2-2.6-6.2-5.9 0-2.8 1.7-4.9 3.2-6.5.9-1 1.4-2 1.5-3.3 2.3 1.3 3.5 3.5 3.5 5.5 1-.6 1.6-1.5 1.9-2.6 1.7 1.9 3 4.1 3 6.9 0 3.3-2.4 5.9-6.2 5.9z"/><path d="M12 21c-1.9 0-3.1-1.3-3.1-3 0-1.6 1-2.7 1.7-3.6.4-.5.8-1.1.9-1.9 1 .6 1.5 1.5 1.5 2.5.5-.3.8-.8 1-1.4 1 1 1.6 2.3 1.6 3.9 0 1.8-1.3 3.5-3.6 3.5z" opacity=".45"/>',
+  map:'<path d="M3.5 6.5 9 4l6 2.5L20.5 4v13.5L15 20l-6-2.5L3.5 20V6.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
+  book:'<path d="M5 4.5h9.5L19 9v10.5H5z"/><path d="M8.2 12h7.6M8.2 15.5h5"/>',
+  medal:'<circle cx="12" cy="9" r="5.4"/><path d="m8.7 13.4-1.9 6.4 5.2-2.6 5.2 2.6-1.9-6.4"/><path d="m10.5 9 1.1 1.1 2.1-2.2"/>',
+  chart:'<path d="M4 20V4.5M4 20h16"/><path d="M8 16v-4.5M12 16V8M16 16v-2.5"/>',
+  star:'<path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1L12 16.9 6.6 19.8l1-6.1L3.2 9.4l6.1-.9z"/>',
+  lock:'<rect x="5" y="10" width="14" height="10" rx="2.4"/><path d="M8 10V7.6a4 4 0 0 1 8 0V10"/>',
+  check:'<path d="m4.8 12.6 4.5 4.5L19.4 6.8"/>',
+  x:'<path d="m6 6 12 12M18 6 6 18"/>',
+  arrow:'<path d="M4.5 12h15M13.5 6l6 6-6 6"/>',
+  play:'<path d="M8 5.2v13.6L19 12z" fill="currentColor" stroke="none"/>',
+  clock:'<circle cx="12" cy="12" r="8.6"/><path d="M12 7v5.3l3.4 2"/>',
+  bolt:'<path d="M13.2 2.8 5.4 13.4h5.3l-.9 7.8 7.8-10.6h-5.2l.8-7.8z"/>',
+  bulb:'<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
+  pencil:'<path d="m4 20 4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20z"/><path d="m13.8 7.2 3 3"/>',
+  sound:'<path d="M4 9.5v5h3.5l5 4v-13l-5 4H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.8 6a8.5 8.5 0 0 1 0 12"/>',
+  motion:'<path d="M3 12h4l2.5-6 4 12 2.5-6h5"/>',
+  reset:'<path d="M4.5 12a7.5 7.5 0 1 0 2.3-5.4M4.5 4v5.5H10"/>',
+  shield:'<path d="M12 3.5 19 6v5.5c0 4.5-3 7.4-7 9-4-1.6-7-4.5-7-9V6l7-2.5z"/><path d="m9 12 2.2 2.2L15.5 10"/>',
+  info:'<circle cx="12" cy="12" r="8.6"/><path d="M12 11v5M12 8h.01"/>',
+  backspace:'<path d="M9 5h10.5A1.5 1.5 0 0 1 21 6.5v11a1.5 1.5 0 0 1-1.5 1.5H9L3 12l6-7z"/><path d="m11.5 9.5 5 5M16.5 9.5l-5 5"/>',
+  target:'<circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1.1" fill="currentColor"/>',
+  sparkle:'<path d="m12 2.8 1.7 4.7 4.7 1.7-4.7 1.7-1.7 4.7-1.7-4.7L5.6 9.2l4.7-1.7z"/><path d="m18.4 15 .8 2.1 2.1.8-2.1.8-.8 2.1-.8-2.1-2.1-.8 2.1-.8z"/>',
+  trophy:'<path d="M8 4h8v5.5a4 4 0 0 1-8 0V4z"/><path d="M8 6H4.5v2.5A3.5 3.5 0 0 0 8 12M16 6h3.5v2.5A3.5 3.5 0 0 1 16 12M12 13.5V18M8.5 21h7"/>',
+  user:'<circle cx="12" cy="8.4" r="3.4"/><path d="M5 20c.8-4 3.2-6 7-6s6.2 2 7 6"/>',
+  leaf:'<path d="M20 4C10.5 4 4.5 9.3 4.5 16c0 2.2 1.2 4 3 4 7 0 13-5.7 12.5-16z"/><path d="M6 19C9.2 13.4 13.5 9.2 17.8 7"/>',
+  volcano:'<path d="M2.5 20.5h19L15.4 7.2h-1.8l-1.1 3.4H9.3L8.2 7.2H6.4L2.5 20.5z"/><path d="M9.3 10.6 8.2 5l3 1 1.9-2.2 1 4.3"/><path d="M11.8 16.5h.01M14.5 18.5h.01M9 18h.01" stroke-width="2.6"/>',
+  shell:'<path d="M3.5 19c0-8.5 3.6-14 8.5-14s8.5 5.5 8.5 14"/><path d="M3.5 19h17M12 5v14M7.2 7.8 4.8 19M16.8 7.8 19.2 19"/>',
+  cactus:'<path d="M9.4 21V7.4a2.6 2.6 0 0 1 5.2 0V21"/><path d="M9.4 14.5H7a2 2 0 0 1-2-2V9.8"/><path d="M14.6 11.5H17a2 2 0 0 0 2-2V7.4"/><path d="M7.5 21h9"/>',
+  crystal:'<path d="m12 2.6 5.6 6.6L12 21.4 6.4 9.2 12 2.6z"/><path d="M6.4 9.2h11.2M9.6 9.2 12 21.4l2.4-12.2"/>',
+  lighthouse:'<path d="M9.2 21h5.6l-1.1-12h-3.4L9.2 21z"/><path d="M8.6 5.2h6.8l-.8 3.8H9.4l-.8-3.8z"/><path d="M12 2.4v2.8M4.5 8.6l3 .8M19.5 8.6l-3 .8"/><path d="M9.6 14.5h4.8"/>',
+  shapes:'<circle cx="7.5" cy="7.5" r="4.2"/><rect x="12.5" y="12.5" width="8" height="8" rx="1.4"/><path d="m6.5 21 3.3-6 3.3 6z"/>',
+  compass:'<circle cx="12" cy="12" r="8.8"/><path d="m15.8 8.2-2.2 5.4-5.4 2.2 2.2-5.4 5.4-2.2z"/>',
+  gem:'<path d="m12 2.6 6.2 5.2L12 21.4 5.8 7.8 12 2.6z"/><path d="M5.8 7.8h12.4M9.2 7.8 12 21.4l2.8-13.6"/>',
+  crown:'<path d="m3.8 8.2 4.4 3.2L12 5l3.8 6.4 4.4-3.2-1.6 11H5.4l-1.6-11z"/><path d="M5.8 19.5h12.4"/>',
+  mountain:'<path d="m2.8 20 6.4-12 4.2 6.3 2.1-3.2 5.7 8.9H2.8z"/><path d="m7.4 12 1.8 1.8L11 12"/>',
+  flag:'<path d="M5.5 21V3.5M5.5 4.5h12.4l-2.4 4 2.4 4H5.5"/>',
+  chartbars:'<path d="M4 20V4.5M4 20h16"/><path d="M8 16v-4.5M12 16V8M16 16v-2.5"/>'
+};
+
+/* ---------- tiny utilities ---------- */
+const pad2 = n => String(n).padStart(2, '0');
+const ymd = d => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const isoAt = (d, h = 10, m = 0) => { const x = new Date(d); x.setHours(h, m, 0, 0); return x.toISOString(); };
+const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+const fmt = n => {
+  const x = Number(n);
+  if (!isFinite(x)) return '0';
+  if (Number.isInteger(x)) return x.toLocaleString('en-US');
+  return String(Math.round(x * 100) / 100);
+};
+const disp = n => n < 0 ? '−' + fmt(Math.abs(n)) : fmt(n);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const textOf = html => String(html).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+const uid = p => p + '_' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-3);
+
+/* deterministic RNG (used by the screenshot / demo mode) */
+let rng = Math.random;
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function seedRng(str) {
+  let h = 2166136261;
+  for (let i = 0; i < String(str).length; i++) { h ^= String(str).charCodeAt(i); h = Math.imul(h, 16777619); }
+  rng = mulberry32(h >>> 0);
+}
+const ri = (a, b) => a + Math.floor(rng() * (b - a + 1));
+const pick = arr => arr[Math.floor(rng() * arr.length)];
+const shuffle = arr => {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+};
+const gcd = (a, b) => { a = Math.abs(a); b = Math.abs(b); while (b) { [a, b] = [b, a % b]; } return a || 1; };
+const simplify = (n, d) => { const g = gcd(n, d); return [n / g, d / g]; };
+const frac = (n, d) => {
+  if (d === 1) return String(n);
+  return `<span class="frac"><span class="num">${n}</span><span class="den">${d}</span></span>`;
+};
+const fracV = (n, d) => {
+  if (d === 1) return String(n);
+  return `<span class="frac"><span class="num">${n}</span><span class="den">${d}</span></span>`;
+};
+
+/* ---------- date helpers ---------- */
+function todayKey() { return ymd(new Date()); }
+function daysBetween(a, b) {
+  if (!a || !b) return 99;
+  const [ay, am, ad] = a.split('-').map(Number);
+  const [by, bm, bd] = b.split('-').map(Number);
+  return Math.round((new Date(by, bm - 1, bd) - new Date(ay, am - 1, ad)) / 86400000);
+}
+
+/* ---------- state ---------- */
+function makeMistake(seed) {
+  return Object.assign({
+    id: uid('m'), mastered: false, attempts: 1, createdAt: new Date().toISOString(),
+    lastAt: new Date().toISOString(), masteredAt: null
+  }, seed);
+}
+
+function seedState() {
+  const now = new Date();
+  const today = ymd(now);
+  const days = {};
+  const plan = [
+    [0, 6], [-1, 12], [-2, 8], [-3, 0], [-4, 10], [-5, 14], [-6, 7]
+  ];
+  plan.forEach(([off, n]) => {
+    const d = ymd(addDays(now, off));
+    days[d] = { answered: n, correct: Math.max(0, n - (off === 0 ? 1 : Math.ceil(n * .12))), minutes: Math.round(n * .55) };
+  });
+
+  const qVol = { kind:'choice', island:'volcano', diff:3, kindLabel:'四則運算',
+    prompt:'25 × 16 = ?', options:['350','400','450','300'], answerIndex:1,
+    explain:'25 × 16 = 25 × (10 + 6) = 250 + 150 = <b>400</b>。',
+    hint:'可以拆做 25 × 10 加 25 × 6。' };
+  const qFrac = { kind:'choice', island:'fraction', diff:2, kindLabel:'分數',
+    prompt:`比較 ${frac(3,5)} 同 ${frac(5,8)}，邊個較大？`, options:[frac(3,5), frac(5,8), '一樣大'], answerIndex:1, optionCols:3,
+    explain:`交叉相乘：3 × 8 = 24，5 × 5 = 25。因為 25 > 24，所以 ${frac(5,8)} 較大。`,
+    hint:'把兩個分數通分，或交叉相乘再比較。' };
+  const qWord = { kind:'input', island:'word', diff:2, kindLabel:'應用題',
+    prompt:'單車以每小時 12 公里行駛 45 分鐘，即係行咗多少公里？', answer:9, unit:'公里',
+    explain:'45 分鐘 = 45/60 小時 = 0.75 小時。12 × 0.75 = <b>9</b> 公里。',
+    hint:'先把 45 分鐘化做小時。' };
+  const qGeo = { kind:'choice', island:'geometry', diff:2, kindLabel:'圖形與度量',
+    prompt:'一個三角形底 12 cm、高 7 cm，面積是多少？', options:['42 cm²','84 cm²','19 cm²','38 cm²'], answerIndex:0,
+    explain:'三角形面積 = 底 × 高 ÷ 2 = 12 × 7 ÷ 2 = <b>42 cm²</b>。',
+    hint:'記得三角形面積要除 2。' };
+  const qData = { kind:'input', island:'data', diff:2, kindLabel:'數據與概率',
+    prompt:'四個數 4、7、9、10 的平均數是多少？', answer:7.5, unit:'',
+    explain:'總和 = 4 + 7 + 9 + 10 = 30，平均數 = 30 ÷ 4 = <b>7.5</b>。',
+    hint:'先把所有數字加起，再除以數量。' };
+
+  return {
+    version:1,
+    player:{
+      name:'阿澄', stage:'primary', xp:1540, streak:5, lastActive:today,
+      createdAt: isoAt(addDays(now, -7)),
+      avatarSeed: 3
+    },
+    islands:{
+      volcano:{ stars:{1:3,2:2,3:0}, plays:4, bestCombo:12, failed:{} },
+      fraction:{ stars:{1:3,2:2,3:1}, plays:5, bestCombo:9, failed:{3:true} },
+      geometry:{ stars:{1:2,2:1,3:0}, plays:3, bestCombo:7, failed:{} },
+      word:{ stars:{1:3,2:0,3:0}, plays:2, bestCombo:6, failed:{} },
+      algebra:{ stars:{1:0,2:0,3:0}, plays:0, bestCombo:0, failed:{} },
+      data:{ stars:{1:0,2:0,3:0}, plays:0, bestCombo:0, failed:{} }
+    },
+    stats:{ answered:148, correct:129, timeSec:1860, bestCombo:12, runs:9, perfectRuns:1, comeback:0, days },
+    badges:{
+      first: isoAt(addDays(now, -6), 16, 10),
+      perfect: isoAt(addDays(now, -4), 19, 22),
+      combo: isoAt(addDays(now, -3), 18, 5),
+      speedy: isoAt(addDays(now, -2), 17, 40),
+      hundred: isoAt(addDays(now, -1), 20, 12)
+    },
+    mistakes:[
+      makeMistake({ q:qFrac, yourAnswer:'3/5', yourHTML:frac(3,5), correctHTML:frac(5,8), createdAt:isoAt(addDays(now, -1), 18, 20), lastAt:isoAt(addDays(now, -1), 18, 20) }),
+      makeMistake({ q:qWord, yourAnswer:'6', yourHTML:'6 公里', correctHTML:'9 公里', createdAt:isoAt(addDays(now, -2), 17, 30), lastAt:isoAt(addDays(now, -2), 17, 30) }),
+      makeMistake({ q:qGeo, yourAnswer:'84', yourHTML:'84 cm²', correctHTML:'42 cm²', createdAt:isoAt(addDays(now, -3), 16, 5), lastAt:isoAt(addDays(now, -3), 16, 5) }),
+      makeMistake({ q:qVol, yourAnswer:'350', yourHTML:'350', correctHTML:'400', createdAt:isoAt(addDays(now, -4), 15, 50), lastAt:isoAt(addDays(now, -4), 15, 50) }),
+      makeMistake({ q:qData, yourAnswer:'7', yourHTML:'7', correctHTML:'7.5', createdAt:isoAt(addDays(now, -5), 19, 10), lastAt:isoAt(addDays(now, -5), 19, 10) }),
+      makeMistake({
+        q:{ kind:'choice', island:'geometry', diff:1, kindLabel:'圖形與度量', prompt:'三角形底 8 cm、高 5 cm，面積是多少？', options:['40 cm²','20 cm²','13 cm²','26 cm²'], answerIndex:1, explain:'三角形面積 = 底 × 高 ÷ 2 = 8 × 5 ÷ 2 = <b>20 cm²</b>。', hint:'記得除以 2。' },
+        yourAnswer:'40', yourHTML:'40 cm²', correctHTML:'20 cm²',
+        createdAt:isoAt(addDays(now, -8), 17, 10), lastAt:isoAt(addDays(now, -6), 17, 10),
+        mastered:true, masteredAt:isoAt(addDays(now, -5), 17, 10)
+      }),
+      makeMistake({
+        q:{ kind:'choice', island:'fraction', diff:1, kindLabel:'分數', prompt:`30 嘅 ${frac(2,5)} 係幾多？`, options:['12','15','10','18'], answerIndex:0, explain:`30 ÷ 5 = 6，6 × 2 = <b>12</b>。`, hint:'先除分母，再乘分子。' },
+        yourAnswer:'15', yourHTML:'15', correctHTML:'12',
+        createdAt:isoAt(addDays(now, -9), 18, 20), lastAt:isoAt(addDays(now, -7), 18, 20),
+        mastered:true, masteredAt:isoAt(addDays(now, -6), 18, 20)
+      }),
+      makeMistake({
+        q:{ kind:'input', island:'algebra', diff:1, kindLabel:'代數', prompt:'搵出 ? 代表嘅數。', visual:'<div class="eqline">7 + <span class="unk">?</span> = 12</div>', answer:5, unit:'', explain:'兩邊同時減 7：? = 12 − 7 = <b>5</b>。', hint:'等式兩邊要同步。' },
+        yourAnswer:'6', yourHTML:'6', correctHTML:'5',
+        createdAt:isoAt(addDays(now, -10), 16, 40), lastAt:isoAt(addDays(now, -8), 16, 40),
+        mastered:true, masteredAt:isoAt(addDays(now, -7), 16, 40)
+      })
+    ],
+    daily:{ date:today, answered:6, correct:5, cleared:1, reviewed:0, claimed:false },
+    settings:{ sound:true, motion:true }
+  };
+}
+
+function blankState() {
+  const now = new Date();
+  return {
+    version:1,
+    player:{ name:'小探險家', stage:'primary', xp:0, streak:0, lastActive:'', createdAt: new Date().toISOString(), avatarSeed:1 },
+    islands: Object.fromEntries(ISLANDS.map(i => [i.id, { stars:{1:0,2:0,3:0}, plays:0, bestCombo:0, failed:{} }])),
+    stats:{ answered:0, correct:0, timeSec:0, bestCombo:0, runs:0, perfectRuns:0, comeback:0, days:{} },
+    badges:{}, mistakes:[],
+    daily:{ date:todayKey(), answered:0, correct:0, cleared:0, reviewed:0, claimed:false },
+    settings:{ sound:true, motion:true }
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.version === 1 && parsed.player && parsed.islands) return parsed;
+    }
+  } catch (e) { /* file:// may block storage — fall back to memory */ }
+  return seedState();
+}
+function persist() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ }
+}
+function resetProgress() {
+  S = blankState();
+  persist();
+}
+
+let S = loadState();
+
+/* daily reset + broken streak repair */
+(function normalizeState() {
+  const t = todayKey();
+  if (!S.daily || S.daily.date !== t) {
+    S.daily = { date:t, answered:0, correct:0, cleared:0, reviewed:0, claimed:false };
+  }
+  if (S.player.lastActive && S.player.lastActive !== t && daysBetween(S.player.lastActive, t) > 1) {
+    S.player.streak = 0;
+  }
+  ISLANDS.forEach(i => {
+    if (!S.islands[i.id]) S.islands[i.id] = { stars:{1:0,2:0,3:0}, plays:0, bestCombo:0, failed:{} };
+    if (!S.islands[i.id].stars) S.islands[i.id].stars = {1:0,2:0,3:0};
+    if (!S.islands[i.id].failed) S.islands[i.id].failed = {};
+  });
+  if (!S.settings) S.settings = { sound:true, motion:true };
+  if (!S.badges) S.badges = {};
+  if (!S.mistakes) S.mistakes = [];
+  if (!S.stats) S.stats = { answered:0, correct:0, timeSec:0, bestCombo:0, runs:0, perfectRuns:0, comeback:0, days:{} };
+  if (!S.stats.days) S.stats.days = {};
+  persist();
+})();
+
+/* ---------- derived values ---------- */
+const getIsland = id => ISLANDS.find(i => i.id === id);
+const getDiff = id => DIFFS.find(d => d.id === Number(id));
+const bestStars = id => {
+  const st = S.islands[id] ? S.islands[id].stars : {};
+  return Math.max(st[1] || 0, st[2] || 0, st[3] || 0);
+};
+const starSum = id => {
+  const st = S.islands[id] ? S.islands[id].stars : {};
+  return (st[1] || 0) + (st[2] || 0) + (st[3] || 0);
+};
+const totalStars = () => ISLANDS.reduce((n, i) => n + starSum(i.id), 0);
+const totalPlays = () => ISLANDS.reduce((n, i) => n + (S.islands[i.id].plays || 0), 0);
+const masteredCount = () => (S.mistakes || []).filter(m => m.mastered).length;
+const openMistakes = () => (S.mistakes || []).filter(m => !m.mastered);
+const accuracy = () => S.stats.answered ? Math.round(S.stats.correct / S.stats.answered * 100) : 0;
+const isUnlocked = idx => idx === 0 || bestStars(ISLANDS[idx - 1].id) >= 1;
+const nextLockedIndex = () => ISLANDS.findIndex((_, i) => !isUnlocked(i));
+const levelInfo = xp => {
+  let lv = 1;
+  for (let i = 0; i < LEVELS.length; i++) if (xp >= LEVELS[i]) lv = i + 1;
+  const base = LEVELS[lv - 1] || 0;
+  const next = LEVELS[lv] || (base + 1200);
+  return { level:lv, base, next, pct: clamp((xp - base) / (next - base) * 100, 0, 100), rank: RANKS[Math.min(lv - 1, RANKS.length - 1)] };
+};
+const todayLabel = () => {
+  const d = new Date();
+  const wd = '日一二三四五六'[d.getDay()];
+  return `${d.getMonth() + 1}月${d.getDate()}日 · 星期${wd}`;
+};
+const greeting = () => {
+  const h = new Date().getHours();
+  if (h < 12) return '早晨';
+  if (h < 18) return '午安';
+  return '夜晚';
+};
+const questState = () => {
+  const d = S.daily || {};
+  return {
+    answered: Math.min(d.answered || 0, 10),
+    cleared: Math.min(d.cleared || 0, 1),
+    reviewed: Math.min(d.reviewed || 0, 2),
+    done: (d.answered || 0) >= 10 && (d.cleared || 0) >= 1 && (d.reviewed || 0) >= 2,
+    count: ((d.answered || 0) >= 10 ? 1 : 0) + ((d.cleared || 0) >= 1 ? 1 : 0) + ((d.reviewed || 0) >= 2 ? 1 : 0)
+  };
+};
+
+/* ---------- SVG helpers ---------- */
+function icon(name, size = 20, sw = 1.9) {
+  return `<svg class="svg-i" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ICONS.star}</svg>`;
+}
+function starHtml(on, size = 13) {
+  return `<svg class="star ${on ? 'on' : 'off'}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="${on ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="m12 2.8 2.8 5.8 6.4.9-4.6 4.5 1.1 6.4-5.7-3-5.7 3 1.1-6.4L2.8 9.5l6.4-.9z"/></svg>`;
+}
+function starsHtml(n, size = 13) {
+  n = Number(n) || 0;
+  return `<span class="stars">${starHtml(n >= 1, size)}${starHtml(n >= 2, size)}${starHtml(n >= 3, size)}</span>`;
+}
+function medalHtml(badge, cls = '') {
+  const earned = !!S.badges[badge.id];
+  const paths = ICONS[badge.icon] || ICONS.star;
+  return `<span class="medal ${earned ? '' : 'locked'} ${cls}" style="--bc:${badge.color}" aria-hidden="true">
+    <svg viewBox="0 0 100 100">
+      <path class="m-ribbon" d="M32 61 21 94l29-13 29 13-11-33" opacity=".82"/>
+      <circle class="m-coin" cx="50" cy="46" r="33"/>
+      <circle cx="50" cy="46" r="26.5" fill="none" stroke="rgba(255,248,232,.5)" stroke-width="2.6" stroke-dasharray="2 4"/>
+      <circle class="m-coin-in" cx="50" cy="46" r="22.5"/>
+      <g class="m-icon" transform="translate(31 27) scale(1.58)" style="stroke-width:2.3">${paths}</g>
+    </svg>
+  </span>`;
+}
+function islandIcon(id, size = 40) {
+  const island = getIsland(id);
+  return `<svg class="node-icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[island ? island.icon : 'island']}</svg>`;
+}
+
+/* mascot: 阿龜 the sea turtle */
+function mascot(mood = 'happy', cls = '') {
+  const faces = {
+    happy: `<circle cx="120.5" cy="75.5" r="2.8" fill="#13343B"/><circle cx="133.5" cy="75.5" r="2.8" fill="#13343B"/><path d="M123.5 84c2.5 2.3 5.8 2.3 8.3 0" fill="none" stroke="#13343B" stroke-width="2.2" stroke-linecap="round"/><circle cx="112.5" cy="82.5" r="4.2" fill="#FF9E8A" opacity=".55"/>`,
+    cheer: `<path d="M116.5 75.5c1.9-2.5 4.4-2.5 6.2 0M130.5 75.5c1.9-2.5 4.4-2.5 6.2 0" fill="none" stroke="#13343B" stroke-width="2.2" stroke-linecap="round"/><path d="M122 82c2.6 5 8.4 5 11 0z" fill="#FF8FA3" stroke="#13343B" stroke-width="1.7" stroke-linejoin="round"/><circle cx="112" cy="81" r="4.5" fill="#FF9E8A" opacity=".65"/><circle cx="141" cy="81" r="3.6" fill="#FF9E8A" opacity=".55"/>`,
+    oops: `<circle cx="120.5" cy="76" r="2.7" fill="#13343B"/><circle cx="133.5" cy="76" r="2.7" fill="#13343B"/><path d="M124 88c2.4-2.4 5.6-2.4 8 0" fill="none" stroke="#13343B" stroke-width="2.2" stroke-linecap="round"/><path d="M144 70c3.2 3.2 4 6.2 2.2 8.2-2 .6-4.2-1.5-4.2-4.2 0-1.6.8-3 2-4z" fill="#8DD7EA" stroke="#147FA8" stroke-width="1.4"/>`,
+    think: `<circle cx="120.5" cy="76" r="2.7" fill="#13343B"/><path d="M130.5 76h5" stroke="#13343B" stroke-width="2.2" stroke-linecap="round"/><path d="M124 87h7" stroke="#13343B" stroke-width="2.2" stroke-linecap="round"/><path d="M145 51c0-4 5.4-4.6 5.4-.8 0 2.4-3 2.6-3 5" fill="none" stroke="#FFC24B" stroke-width="2.6" stroke-linecap="round"/><circle cx="147.4" cy="59" r="1.6" fill="#FFC24B"/>`,
+    sleep: `<path d="M116.5 77c2-2 4.4-2 6.2 0M130.5 77c2-2 4.4-2 6.2 0" fill="none" stroke="#13343B" stroke-width="2.2" stroke-linecap="round"/><path d="M124 87c2.4 1.4 5.6 1.4 8 0" fill="none" stroke="#13343B" stroke-width="2.2" stroke-linecap="round"/>`
+  };
+  const extras = {
+    cheer: `<g color="#FFC24B"><path d="m26 42 1.4 4 4 1.4-4 1.4-1.4 4-1.4-4-4-1.4 4-1.4z" fill="currentColor"/><path d="m143 23 1 3 3 1-3 1-1 3-1-3-3-1 3-1z" fill="currentColor" opacity=".8"/></g>`,
+    oops: `<g opacity=".9"><path d="M31 30c5 0 8 4 8 8" fill="none" stroke="#FFD98A" stroke-width="2.5" stroke-linecap="round"/></g>`,
+    think: '', happy: '', sleep: `<g fill="none" stroke="#FFD98A" stroke-width="2" stroke-linecap="round"><path d="M124 44h7l-7 7h7"/><path d="M137 35h5l-5 5h5"/></g>`
+  };
+  return `<svg class="mascot ${cls}" viewBox="0 0 160 152" fill="none" aria-hidden="true">
+    <ellipse cx="80" cy="143" rx="47" ry="7" fill="rgba(4,42,51,.16)"/>
+    <path d="M33 93c-9 3-14 12-10 19 9-1 17-7 22-14z" fill="#7CCBB1" stroke="#073B47" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M110 117c5 11 16 15 24 9-2-8-8-14-16-16z" fill="#7CCBB1" stroke="#073B47" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M44 64c0-19 14-30 30-30s30 11 30 30" fill="#7CCBB1" opacity=".8"/>
+    <ellipse cx="74" cy="91" rx="48" ry="39" fill="#16A394" stroke="#073B47" stroke-width="3.4"/>
+    <ellipse cx="74" cy="91" rx="48" ry="39" fill="none" stroke="#FFD98A" stroke-width="4"/>
+    <ellipse cx="74" cy="91" rx="40" ry="31" fill="none" stroke="#0B7A72" stroke-width="2" opacity=".5"/>
+    <path d="M74 56v70M35 78c14 9 64 9 78 0M42 114c11-8 52-8 64 0" stroke="#FFE9B8" stroke-width="2" stroke-linecap="round" opacity=".45"/>
+    <circle cx="59" cy="72" r="3.4" fill="#FFE9B8" opacity=".55"/><circle cx="92" cy="105" r="2.6" fill="#FFE9B8" opacity=".45"/><circle cx="48" cy="101" r="2" fill="#FFE9B8" opacity=".4"/>
+    <circle cx="124" cy="78" r="21" fill="#A9E0C9" stroke="#073B47" stroke-width="3.2"/>
+    <path d="M105 64c9-8 29-8 38 0l-2.5 8c-9-6-23-6-32 0z" fill="#FF6B4A" stroke="#073B47" stroke-width="2.4" stroke-linejoin="round"/>
+    <path d="M141 65c6 1 10 4 11 9-5 0-9-2-12-5z" fill="#FF6B4A" stroke="#073B47" stroke-width="2.2" stroke-linejoin="round"/>
+    ${faces[mood] || faces.happy}
+    <path d="M99 122c4 5 11 5 15 0" fill="none" stroke="#073B47" stroke-width="2.8" stroke-linecap="round" opacity=".28"/>
+    ${extras[mood] || ''}
+  </svg>`;
+}
+
+/* map scenery */
+function mapScenery() {
+  return `
+  <svg class="map-compass" viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+    <circle cx="30" cy="30" r="17"/>
+    <circle cx="30" cy="30" r="23" stroke-dasharray="1 5"/>
+    <path d="M30 11v38M11 30h38" opacity=".5"/>
+    <path d="m30 14 5 14-5 3-5-3z" fill="#FF6B4A" stroke="none"/>
+    <path d="m30 46-5-14 5-3 5 3z" fill="#FFF8E8" stroke="none"/>
+    <circle cx="30" cy="30" r="3" fill="#13343B" stroke="none"/>
+  </svg>
+  <svg class="map-island-deco" style="right:26px;top:104px;width:44px" viewBox="0 0 60 40" fill="none" aria-hidden="true">
+    <path d="M10 30c-4 0-6-3-6-6s3-5 6-4c1-5 9-7 12-2 5-3 11 0 11 5 5 0 7 4 6 7H10z" fill="#FFFDF6" opacity=".8"/>
+  </svg>
+  <svg class="map-island-deco" style="left:16px;top:150px;width:34px" viewBox="0 0 40 24" fill="none" stroke="#13343B" stroke-width="1.6" stroke-linecap="round" opacity=".28" aria-hidden="true">
+    <path d="M4 16c4-6 9-6 13 0M18 12c3-4 7-4 10 0"/>
+  </svg>
+  <svg class="map-island-deco" style="left:18px;bottom:54px;width:40px;opacity:.5" viewBox="0 0 48 34" fill="none" aria-hidden="true">
+    <path d="M6 28c2-7 6-11 10-11s8 4 10 11" stroke="#2E8B4F" stroke-width="2" stroke-linecap="round"/>
+    <path d="M16 27V13M16 15c-4 0-7-2-7-5 4 0 7 2 7 5zM16 15c4 0 7-2 7-5-4 0-7 2-7 5z" stroke="#2E8B4F" stroke-width="1.6" stroke-linejoin="round"/>
+    <path d="M4 29h40" stroke="#C9B07A" stroke-width="2" stroke-linecap="round"/>
+  </svg>`;
+}
+
+
+/* =========================================================
+   Question engine — six islands, three difficulties
+   ========================================================= */
+const lcm = (a, b) => a * b / gcd(a, b);
+
+function wrongNumbers(ans, count = 3, opt = {}) {
+  const min = opt.min === undefined ? -9999 : opt.min;
+  const max = opt.max === undefined ? 9999 : opt.max;
+  const deltas = [1, -1, 2, -2, 5, -5, 10, -10, 3, -3, 20, -20, 100, -100, 0.5, -0.5];
+  const out = [];
+  const seen = new Set([ans]);
+  for (const d of deltas) {
+    let v = ans + d;
+    if (!Number.isInteger(ans)) v = Math.round(v * 100) / 100;
+    if (v !== ans && v >= min && v <= max && !seen.has(v)) { seen.add(v); out.push(v); }
+    if (out.length >= count) break;
+  }
+  let k = 1;
+  while (out.length < count) {
+    let v = ans + k * 7 * (k % 2 ? 1 : -1);
+    if (v >= min && v <= max && !seen.has(v)) { seen.add(v); out.push(v); }
+    k++;
+  }
+  return out;
+}
+
+function choiceQ(o) {
+  const seen = new Set();
+  const raw = [o.correct, ...(o.wrongs || [])].filter(v => v !== undefined && v !== null);
+  const uniq = [];
+  raw.forEach(v => { const k = String(v); if (!seen.has(k)) { seen.add(k); uniq.push(v); } });
+  while (uniq.length < 3) uniq.push(String(o.correct) + ' ');
+  const options = shuffle(uniq);
+  return Object.assign({}, o, {
+    kind: 'choice',
+    options,
+    answerIndex: options.indexOf(o.correct),
+    optionCols: o.optionCols || 2,
+    center: !!o.center
+  });
+}
+
+function inputQ(o) {
+  return Object.assign({ kind: 'input', unit: '' }, o);
+}
+
+const unitStr = (n, unit) => {
+  if (!unit) return disp(n);
+  if (unit === '元') return '$' + fmt(n);
+  if (unit === '°') return disp(n) + '°';
+  return disp(n) + ' ' + unit;
+};
+
+/* ---------- 1. 火山速算 ---------- */
+function genVolcano(diff, stage) {
+  const sec = stage === 'secondary';
+  const timer = diff === 1 ? 16 : diff === 2 ? 13 : 11;
+  const base = { island: 'volcano', diff, kindLabel: '四則運算', timer };
+  const make = (prompt, ans, explain, extra = {}) => choiceQ(Object.assign({}, base, {
+    prompt, correct: disp(ans), wrongs: wrongNumbers(ans, 3, { min: sec ? -999 : 0 }).map(disp), explain
+  }, extra));
+
+  let type;
+  if (diff === 1) type = pick(['add', 'sub', 'mul', 'missing']);
+  else if (diff === 2) type = pick(['add', 'sub', 'mul', 'div', 'mixed', 'percent']);
+  else type = pick(['mul', 'mixed', 'percent', 'power', 'div']);
+
+  if (type === 'add') {
+    let a, b;
+    if (diff === 1) { a = ri(3, 18); b = ri(2, 9); }
+    else if (diff === 2) { a = ri(24, 89); b = ri(13, 76); }
+    else { a = ri(145, 790); b = ri(85, 690); }
+    if (sec && diff >= 2 && rng() < .35) a = -a;
+    const ans = a + b;
+    const prompt = `${disp(a)} + ${b < 0 ? '(' + disp(b) + ')' : b} = ?`;
+    return make(prompt, ans, `${disp(a)} + ${disp(b)} = <b>${disp(ans)}</b>。`, { center: true });
+  }
+
+  if (type === 'sub') {
+    let a, b;
+    if (diff === 1) { a = ri(8, 20); b = ri(2, a - 2); }
+    else if (diff === 2) { a = ri(45, 120); b = ri(12, a - 8); }
+    else { a = ri(180, 940); b = ri(65, 160); if (sec && rng() < .3) a = -a; }
+    const ans = a - b;
+    const prompt = `${disp(a)} − ${b < 0 ? '(' + disp(b) + ')' : b} = ?`;
+    return make(prompt, ans, `${disp(a)} 減 ${disp(b)}，等於 <b>${disp(ans)}</b>。`, { center: true });
+  }
+
+  if (type === 'mul') {
+    let a, b;
+    if (diff === 1) { a = ri(2, 9); b = ri(2, 9); }
+    else if (diff === 2) { a = ri(3, 12); b = ri(4, 19); }
+    else { a = ri(12, 29); b = ri(11, 29); }
+    const ans = a * b;
+    return make(`${a} × ${b} = ?`, ans, `${a} × ${b} = <b>${fmt(ans)}</b>。`, { center: true });
+  }
+
+  if (type === 'div') {
+    const b = ri(3, 12); const ans = ri(3, 12); const a = b * ans;
+    return make(`${a} ÷ ${b} = ?`, ans, `因為 ${b} × ${ans} = ${a}，所以 ${a} ÷ ${b} = <b>${ans}</b>。`, { center: true });
+  }
+
+  if (type === 'missing') {
+    const a = ri(4, 15); const ans = ri(3, 12); const b = a + ans;
+    return make(
+      `${a} + <span class="unk">?</span> = ${b}`, ans,
+      `兩邊同時減 ${a}：? = ${b} − ${a} = <b>${ans}</b>。`,
+      { center: true, prompt: `${a} + <span class="unk">?</span> = ${b}` }
+    );
+  }
+
+  if (type === 'mixed') {
+    const a = ri(3, 9), b = ri(4, 12);
+    if (diff === 2) {
+      if (rng() < .5) {
+        const c = ri(4, 20); const ans = a * b + c;
+        return make(`${a} × ${b} + ${c} = ?`, ans,
+          `先乘後加：${a} × ${b} = ${a * b}，再加 ${c}，等於 <b>${ans}</b>。`,
+          { center: true, wrongs: [String((a * b + c) ), String(a * (b + c)), String(a * b + c + 10), String(a * b + c - 10)] });
+      } else {
+        const c = ri(3, 9); const ans = a + b * c;
+        return make(`${a} + ${b} × ${c} = ?`, ans,
+          `先乘後加：${b} × ${c} = ${b * c}，再加 ${a}，等於 <b>${ans}</b>。`,
+          { center: true });
+      }
+    } else {
+      if (rng() < .55) {
+        const c = ri(3, 8); const ans = (a + b) * c;
+        return make(`(${a} + ${b}) × ${c} = ?`, ans,
+          `先算括號：${a} + ${b} = ${a + b}；再乘 ${c}，等於 <b>${ans}</b>。`,
+          { center: true });
+      } else {
+        const c = ri(4, Math.max(5, a * b - 1)); const ans = a * b - c;
+        return make(`${a} × ${b} − ${c} = ?`, Math.abs(ans),
+          `先乘後減：${a} × ${b} = ${a * b}，再減 ${c}，等於 <b>${a * b - c}</b>。`,
+          { center: true });
+      }
+    }
+  }
+
+  if (type === 'percent') {
+    const p = pick([10, 20, 25, 50]);
+    const baseN = pick([20, 40, 60, 80, 120, 160, 200, 240]);
+    const ans = baseN * p / 100;
+    return make(`${baseN} 嘅 ${p}% 係幾多？`, ans,
+      `${baseN} × ${p}% = ${baseN} × ${p / 100} = <b>${fmt(ans)}</b>。`,
+      { center: true });
+  }
+
+  if (type === 'power') {
+    const a = ri(2, 9);
+    const e = diff === 3 ? pick([2, 2, 3]) : 2;
+    const ans = Math.pow(a, e);
+    return make(`${a}<sup>${e}</sup> = ?`, ans,
+      `${a}<sup>${e}</sup> 即係 ${Array(e).fill(a).join(' × ')}，等於 <b>${fmt(ans)}</b>。`,
+      { center: true });
+  }
+
+  return make('12 × 4 = ?', 48, '12 × 4 = <b>48</b>。', { center: true });
+}
+
+/* ---------- 2. 分數叢林 ---------- */
+function fractionBars(n1, d1, n2, d2) {
+  const bar = (n, d, y, label, color) => {
+    const x = 62, w = 214, seg = w / d;
+    let cells = '';
+    for (let k = 0; k < d; k++) {
+      cells += `<rect x="${x + k * seg}" y="${y}" width="${seg}" height="26" fill="${k < n ? color : '#FFFDF6'}" stroke="#0E6573" stroke-width="1.1"/>`;
+    }
+    return `<text x="14" y="${y + 18}" font-size="12" font-weight="800" fill="#13343B">${label}</text>${cells}
+      <text x="${x + w + 8}" y="${y + 18}" font-size="11" fill="#547077">${n}/${d}</text>`;
+  };
+  return `<svg class="viz-svg" viewBox="0 0 300 150" role="img" aria-label="兩個分數的長條圖比較">
+    <text x="14" y="15" font-size="9" font-weight="800" fill="#879A9C">邊個著色部分較多？</text>
+    ${bar(n1, d1, 30, 'A', '#2E8B4F')}
+    ${bar(n2, d2, 82, 'B', '#E8A21E')}
+  </svg>`;
+}
+
+function fracOptionSet(correctTuple, wrongTuples) {
+  const [cn, cd] = correctTuple;
+  const correct = frac(cn, cd);
+  const seen = new Set([cn / cd]);
+  const wrongs = [];
+  for (const [n, d] of wrongTuples) {
+    if (!d || d === 0 || !Number.isFinite(n)) continue;
+    const v = n / d;
+    if (seen.has(v)) continue;
+    seen.add(v);
+    wrongs.push(frac(n, d));
+    if (wrongs.length >= 3) break;
+  }
+  const extras = [[cn + 1, cd], [cn + 2, cd], [cn, cd + 1], [cn + 1, cd + 1], [Math.max(1, cn - 1), cd + 2]];
+  for (const [n, d] of extras) {
+    if (wrongs.length >= 3) break;
+    const v = n / d;
+    if (seen.has(v)) continue;
+    seen.add(v); wrongs.push(frac(n, d));
+  }
+  return { correct, wrongs };
+}
+
+function genFraction(diff, stage) {
+  const sec = stage === 'secondary';
+  const base = { island: 'fraction', diff, kindLabel: '分數' };
+  const makeFrac = (prompt, correct, wrongs, explain, extra = {}) => choiceQ(Object.assign({}, base, {
+    prompt, correct, wrongs, explain, center: true, optionCols: 2
+  }, extra));
+
+  const types = diff === 1
+    ? ['compare', 'add', 'of']
+    : diff === 2
+      ? ['compare', 'equal', 'add', 'of', 'simplify']
+      : (sec ? ['compare', 'add', 'multiply', 'divide', 'of'] : ['compare', 'add', 'multiply', 'of', 'simplify']);
+
+  const type = pick(types);
+
+  if (type === 'compare') {
+    let n1, d1, n2, d2;
+    if (diff === 1) {
+      d1 = d2 = pick([4, 5, 6, 8]);
+      n1 = ri(1, d1 - 2); n2 = ri(1, d1 - 1);
+      if (n1 === n2) n2 = n1 === d1 - 1 ? 1 : n1 + 1;
+    } else if (diff === 2) {
+      const pair = pick([[2, 3], [3, 4], [4, 6], [5, 8], [3, 5], [6, 8]]);
+      [d1, d2] = pair; n1 = ri(1, d1 - 1); n2 = ri(1, d2 - 1);
+    } else {
+      const pair = pick([[4, 6], [6, 8], [5, 8], [6, 9], [8, 12], [9, 12]]);
+      [d1, d2] = pair; n1 = ri(2, d1 - 1); n2 = ri(2, d2 - 1);
+    }
+    let equal = false;
+    if (diff >= 2 && rng() < .18) {
+      const cand = n1 * d2 / d1;
+      if (Number.isInteger(cand) && cand > 0 && cand < d2) { n2 = cand; equal = true; }
+    }
+    if (!equal && n1 * d2 === n2 * d1) {
+      n2 = (n2 + 1) % d2 || 1;
+      if (n1 * d2 === n2 * d1) n2 = (n2 + 1) % d2 || 1;
+    }
+    const p1 = frac(n1, d1), p2 = frac(n2, d2);
+    const correct = equal ? '一樣大' : (n1 * d2 > n2 * d1 ? p1 : p2);
+    const wrongs = equal ? [p1, p2] : (correct === p1 ? [p2, '一樣大'] : [p1, '一樣大']);
+    const explain = equal
+      ? `交叉相乘：${n1} × ${d2} = ${n1 * d2}，${n2} × ${d1} = ${n2 * d1}，兩邊相等，所以一樣大。`
+      : `交叉相乘：${n1} × ${d2} = ${n1 * d2}，${n2} × ${d1} = ${n2 * d1}。因為 ${Math.max(n1 * d2, n2 * d1)} > ${Math.min(n1 * d2, n2 * d1)}，所以 ${correct} 較大。`;
+    return makeFrac(
+      `比較 ${p1} 同 ${p2}，邊個較大？`,
+      correct, wrongs, explain,
+      { optionCols: 3, visual: diff === 1 ? fractionBars(n1, d1, n2, d2) : '' }
+    );
+  }
+
+  if (type === 'equal') {
+    const d = pick([3, 4, 5, 6]); const n = ri(1, d - 1);
+    const k = ri(2, 4);
+    const opts = fracOptionSet([n * k, d * k], [[n + k, d + k], [n * k, d], [n, d * k], [n * k + 1, d * k]]);
+    return makeFrac(
+      `邊個分數同 ${frac(n, d)} 相等？`,
+      opts.correct, opts.wrongs,
+      `分子同分母同時乘 ${k}：${frac(n, d)} = ${frac(n * k, d * k)}。`,
+      { visual: '' }
+    );
+  }
+
+  if (type === 'add') {
+    let d1, d2, n1, n2, sub = false;
+    if (diff === 1) {
+      d1 = d2 = ri(6, 10); n1 = ri(1, 3); n2 = ri(1, 3);
+    } else if (diff === 2) {
+      [d1, d2] = pick([[2, 4], [3, 6], [4, 8], [2, 5], [3, 4], [5, 10]]);
+      n1 = ri(1, d1 - 1); n2 = ri(1, d2 - 1);
+    } else {
+      [d1, d2] = pick([[3, 4], [4, 6], [5, 8], [6, 9], [8, 12]]);
+      n1 = ri(2, d1 - 1); n2 = ri(2, d2 - 1);
+      sub = rng() < .4;
+    }
+    if (sub && n1 / d1 <= n2 / d2) {
+      [n1, n2] = [n2, n1]; [d1, d2] = [d2, d1];
+      if (n1 / d1 <= n2 / d2) sub = false;
+    }
+    const l = lcm(d1, d2);
+    const N1 = n1 * (l / d1), N2 = n2 * (l / d2);
+    const num = sub ? N1 - N2 : N1 + N2;
+    const [sn, sd] = simplify(num, l);
+    const opts = fracOptionSet([sn, sd], [
+      [num, d1 + d2], [N1 + N2, l], [Math.max(1, num + 1), l], [sn + 1, sd]
+    ]);
+    const op = sub ? '−' : '+';
+    const explain = `通分：${frac(n1, d1)} ${op} ${frac(n2, d2)} = ${frac(N1, l)} ${op} ${frac(N2, l)} = ${frac(num, l)}${num !== sn ? ' = ' + opts.correct : ''}。`;
+    return makeFrac(
+      `${frac(n1, d1)} ${op} ${frac(n2, d2)} = ?`,
+      opts.correct, opts.wrongs, explain, { optionCols: 2 }
+    );
+  }
+
+  if (type === 'of') {
+    const d = pick([3, 4, 5, 6]); const n = ri(1, d - 1);
+    const each = ri(3, 9); const total = d * each;
+    const ans = n * each;
+    const distract = [total - ans, total / n, ans + n, each, ans + each].filter(v => Number.isFinite(v) && v > 0 && v !== ans);
+    const wrongs = [...new Set(distract.map(disp))].slice(0, 3);
+    while (wrongs.length < 3) wrongs.push(disp(ans + wrongs.length + 1));
+    return choiceQ(Object.assign({}, base, {
+      prompt: `${total} 嘅 ${frac(n, d)} 係幾多？`,
+      correct: disp(ans),
+      wrongs,
+      explain: `${total} ÷ ${d} = ${each}，再乘 ${n}：${each} × ${n} = <b>${ans}</b>。`,
+      center: true
+    }));
+  }
+
+  if (type === 'simplify') {
+    const d = pick([6, 8, 9, 10, 12]); const n = ri(2, d - 1);
+    const g = gcd(n, d);
+    if (g === 1) return genFraction(diff, stage);
+    const opts = fracOptionSet([n / g, d / g], [
+      [n, d / g], [n / g, d], [n + 1, d], [n + g, d]
+    ]);
+    return makeFrac(
+      `化簡 ${frac(n, d)}`,
+      opts.correct, opts.wrongs,
+      `分子同分母嘅最大公因數係 ${g}，同時除以 ${g}，得到 ${opts.correct}。`
+    );
+  }
+
+  if (type === 'multiply') {
+    const d1 = pick([2, 3, 4, 5]), d2 = pick([3, 4, 5, 6]);
+    const n1 = ri(1, d1 - 1), n2 = ri(1, d2 - 1);
+    const [sn, sd] = simplify(n1 * n2, d1 * d2);
+    const opts = fracOptionSet([sn, sd], [
+      [n1 * n2, d1 * d2], [n1 + n2, d1 + d2], [n1 * d2, n2 * d1], [n1 * n2 + 1, d1 * d2]
+    ]);
+    return makeFrac(
+      `${frac(n1, d1)} × ${frac(n2, d2)} = ?`,
+      opts.correct, opts.wrongs,
+      `分子乘分子、分母乘分母：${frac(n1 * n2, d1 * d2)}${sn !== n1 * n2 ? ' = ' + opts.correct : ''}。`,
+      { optionCols: 2 }
+    );
+  }
+
+  if (type === 'divide') {
+    const a = ri(1, 3), b = pick([2, 3, 4]), c = ri(1, 2), d = pick([3, 5]);
+    const [sn, sd] = simplify(a * d, b * c);
+    const opts = fracOptionSet([sn, sd], [
+      [a * d, b * c], [a * c, b * d], [a * b, c * d], [sn + 1, sd]
+    ]);
+    return makeFrac(
+      `${frac(a, b)} ÷ ${frac(c, d)} = ?`,
+      opts.correct, opts.wrongs,
+      `除以一個分數，等於乘佢嘅倒數：${frac(a, b)} × ${frac(d, c)} = ${frac(a * d, b * c)}${(sn !== a * d || sd !== b * c) ? ' = ' + opts.correct : ''}。`,
+      { optionCols: 2 }
+    );
+  }
+
+  return genFraction(2, stage);
+}
+
+/* ---------- 3. 圖形海灣 ---------- */
+function svgWrap(inner, label) {
+  return `<svg class="viz-svg" viewBox="0 0 300 180" role="img" aria-label="${label}">${inner}</svg>`;
+}
+function rectViz(w, h) {
+  return svgWrap(`
+    <rect x="60" y="34" width="180" height="106" rx="3" class="viz-fill" stroke="#0B7A72" stroke-width="2.4"/>
+    <path d="M60 152h180" stroke="#879A9C" stroke-width="1.4"/>
+    <path d="M60 148v8M240 148v8" stroke="#879A9C" stroke-width="1.4"/>
+    <text x="150" y="170" text-anchor="middle" class="viz-num">${w} cm</text>
+    <path d="M252 34v106" stroke="#879A9C" stroke-width="1.4"/>
+    <path d="M248 34h8M248 140h8" stroke="#879A9C" stroke-width="1.4"/>
+    <text x="266" y="92" text-anchor="middle" class="viz-num" transform="rotate(90 266 92)">${h} cm</text>
+  `, `長方形，長 ${w} 厘米，闊 ${h} 厘米`);
+}
+function triViz(b, h) {
+  return svgWrap(`
+    <path d="M150 26 52 146h196z" class="viz-fill" stroke="#0B7A72" stroke-width="2.4" stroke-linejoin="round"/>
+    <path d="M150 26v120" stroke="#879A9C" stroke-width="1.6" stroke-dasharray="4 4"/>
+    <path d="M141 136h9v10" fill="none" stroke="#879A9C" stroke-width="1.4"/>
+    <text x="150" y="166" text-anchor="middle" class="viz-num">底 ${b} cm</text>
+    <text x="160" y="92" class="viz-num">高 ${h} cm</text>
+  `, `三角形，底 ${b} 厘米，高 ${h} 厘米`);
+}
+function circleViz(r) {
+  return svgWrap(`
+    <circle cx="150" cy="86" r="58" class="viz-fill" stroke="#0B7A72" stroke-width="2.4"/>
+    <circle cx="150" cy="86" r="3" fill="#0B7A72"/>
+    <path d="M150 86h58" stroke="#E5432B" stroke-width="2" stroke-dasharray="4 3"/>
+    <text x="176" y="78" text-anchor="middle" class="viz-num">${r} cm</text>
+    <text x="150" y="166" text-anchor="middle" class="viz-label">半徑 = ${r} cm</text>
+  `, `圓形，半徑 ${r} 厘米`);
+}
+function paraViz(b, h) {
+  return svgWrap(`
+    <path d="M72 146 122 36h108L180 146z" class="viz-fill" stroke="#0B7A72" stroke-width="2.4" stroke-linejoin="round"/>
+    <path d="M122 36v110" stroke="#879A9C" stroke-width="1.6" stroke-dasharray="4 4"/>
+    <path d="M113 136h9v10" fill="none" stroke="#879A9C" stroke-width="1.4"/>
+    <text x="150" y="166" text-anchor="middle" class="viz-num">底 ${b} cm</text>
+    <text x="134" y="96" class="viz-num">高 ${h} cm</text>
+  `, `平行四邊形，底 ${b} 厘米，高 ${h} 厘米`);
+}
+function trapeziumViz(a, b, h) {
+  const top = 180, bot = 236;
+  return svgWrap(`
+    <path d="M${150 - top / 2} 36h${top}l${(bot - top) / 2} 108h-${bot}z" class="viz-fill" stroke="#0B7A72" stroke-width="2.4" stroke-linejoin="round"/>
+    <path d="M150 36v108" stroke="#879A9C" stroke-width="1.6" stroke-dasharray="4 4"/>
+    <text x="150" y="166" text-anchor="middle" class="viz-num">下底 ${b} cm</text>
+    <text x="150" y="26" text-anchor="middle" class="viz-num">上底 ${a} cm</text>
+    <text x="162" y="94" class="viz-num">高 ${h} cm</text>
+  `, `梯形，上底 ${a} 厘米，下底 ${b} 厘米，高 ${h} 厘米`);
+}
+function cuboidViz(a, b, c) {
+  return svgWrap(`
+    <path d="M72 64h126v92H72z" class="viz-fill" stroke="#0B7A72" stroke-width="2.2"/>
+    <path d="m72 64 32-26h126L198 64" fill="none" stroke="#0B7A72" stroke-width="2.2" stroke-linejoin="round"/>
+    <path d="M198 64v92l32-26V38" fill="none" stroke="#0B7A72" stroke-width="2.2" stroke-linejoin="round"/>
+    <path d="M72 156l32-26h126" fill="none" stroke="#0B7A72" stroke-width="2.2" stroke-linejoin="round"/>
+    <text x="135" y="174" text-anchor="middle" class="viz-num">長 ${a} cm</text>
+    <text x="58" y="116" text-anchor="middle" class="viz-num" transform="rotate(-90 58 116)">高 ${c} cm</text>
+    <text x="232" y="116" text-anchor="middle" class="viz-num" transform="rotate(-90 232 116)">闊 ${b} cm</text>
+  `, `長方體，長 ${a} 厘米，闊 ${b} 厘米，高 ${c} 厘米`);
+}
+function angleTriViz(a, b) {
+  return svgWrap(`
+    <path d="M150 26 48 148h204z" class="viz-fill" stroke="#0B7A72" stroke-width="2.4" stroke-linejoin="round"/>
+    <text x="150" y="52" text-anchor="middle" class="viz-num">${a}°</text>
+    <text x="78" y="142" text-anchor="middle" class="viz-num">${b}°</text>
+    <text x="224" y="142" text-anchor="middle" class="viz-num" fill="#D9492A">?</text>
+  `, `三角形其中兩隻角是 ${a} 度和 ${b} 度`);
+}
+function pythViz(a, b, c) {
+  return svgWrap(`
+    <path d="M60 34v112h180z" class="viz-fill" stroke="#0B7A72" stroke-width="2.4" stroke-linejoin="round"/>
+    <path d="M60 126h20v20" fill="none" stroke="#879A9C" stroke-width="1.5"/>
+    <text x="50" y="94" text-anchor="middle" class="viz-num" transform="rotate(-90 50 94)">${a} cm</text>
+    <text x="150" y="168" text-anchor="middle" class="viz-num">${b} cm</text>
+    <text x="160" y="82" class="viz-num" fill="#D9492A">? cm</text>
+  `, `直角三角形，兩條直角邊分別是 ${a} 厘米和 ${b} 厘米`);
+}
+
+function genGeometry(diff, stage) {
+  const sec = stage === 'secondary';
+  const base = { island: 'geometry', diff, kindLabel: '圖形與度量' };
+  const make = (prompt, ansText, wrongs, explain, visual) => choiceQ(Object.assign({}, base, {
+    prompt, correct: ansText, wrongs, explain, visual: visual || '', center: false
+  }));
+
+  const types = diff === 1
+    ? ['rectArea', 'rectPerim', 'square', 'triangle']
+    : diff === 2
+      ? ['triangle', 'rectPerim', 'parallelogram', 'angle', 'circleC']
+      : (sec ? ['circleA', 'cuboid', 'pyth', 'trapezium', 'angle'] : ['circleA', 'trapezium', 'cuboid', 'angle', 'triangle']);
+
+  const type = pick(types);
+
+  if (type === 'rectArea') {
+    const w = ri(4, 13), h = ri(3, 9), ans = w * h;
+    return make(`長方形長 ${w} cm、闊 ${h} cm，面積是多少？`, `${ans} cm²`,
+      [`${2 * (w + h)} cm`, `${w + h} cm²`, `${ans + w} cm²`],
+      `長方形面積 = 長 × 闊 = ${w} × ${h} = <b>${ans} cm²</b>。`, rectViz(w, h));
+  }
+  if (type === 'rectPerim') {
+    const w = ri(5, 14), h = ri(3, 9), ans = 2 * (w + h);
+    return make(`長方形長 ${w} cm、闊 ${h} cm，周界是多少？`, `${ans} cm`,
+      [`${w * h} cm`, `${w + h} cm`, `${ans + 2} cm`],
+      `長方形周界 = (長 + 闊) × 2 = (${w} + ${h}) × 2 = <b>${ans} cm</b>。`, rectViz(w, h));
+  }
+  if (type === 'square') {
+    const s = ri(4, 12);
+    if (rng() < .5) {
+      const ans = s * 4;
+      return make(`正方形邊長 ${s} cm，周界是多少？`, `${ans} cm`,
+        [`${s * s} cm`, `${s * 2} cm`, `${ans + 4} cm`],
+        `正方形四條邊一樣長：${s} × 4 = <b>${ans} cm</b>。`, rectViz(s, s));
+    }
+    const ans = s * s;
+    return make(`正方形邊長 ${s} cm，面積是多少？`, `${ans} cm²`,
+      [`${s * 4} cm²`, `${s * 2} cm²`, `${ans + s} cm²`],
+      `正方形面積 = 邊長 × 邊長 = ${s} × ${s} = <b>${ans} cm²</b>。`, rectViz(s, s));
+  }
+  if (type === 'triangle') {
+    const b = 2 * ri(3, 10), h = ri(4, 11), ans = b * h / 2;
+    return make(`三角形底 ${b} cm、高 ${h} cm，面積是多少？`, `${ans} cm²`,
+      [`${b * h} cm²`, `${b + h} cm²`, `${ans + b} cm²`],
+      `三角形面積 = 底 × 高 ÷ 2 = ${b} × ${h} ÷ 2 = <b>${ans} cm²</b>。`, triViz(b, h));
+  }
+  if (type === 'parallelogram') {
+    const b = ri(6, 14), h = ri(4, 9), ans = b * h;
+    return make(`平行四邊形底 ${b} cm、高 ${h} cm，面積是多少？`, `${ans} cm²`,
+      [`${b * h / 2} cm²`, `${2 * (b + h)} cm²`, `${ans + b} cm²`],
+      `平行四邊形面積 = 底 × 高 = ${b} × ${h} = <b>${ans} cm²</b>。`, paraViz(b, h));
+  }
+  if (type === 'angle') {
+    const a = ri(35, 80), b = ri(30, 75);
+    const ans = 180 - a - b;
+    return make(`三角形其中兩隻角是 ${a}° 和 ${b}°，第三隻角是多少？`, `${ans}°`,
+      [`${180 - a}°`, `${a + b}°`, `${360 - a - b}°`],
+      `三角形內角和是 180°：180° − ${a}° − ${b}° = <b>${ans}°</b>。`, angleTriViz(a, b));
+  }
+  if (type === 'circleC') {
+    const r = pick([4, 5, 10]);
+    const ans = Math.round(2 * 3.14 * r * 10) / 10;
+    return make(`圓形半徑 ${r} cm，周界（圓周）是多少？〈取 π = 3.14〉`, `${ans} cm`,
+      [`${Math.round(3.14 * r * 10) / 10} cm`, `${r * 2} cm`, `${Math.round(3.14 * r * r * 10) / 10} cm`],
+      `圓周 = 2 × π × r = 2 × 3.14 × ${r} = <b>${ans} cm</b>。`, circleViz(r));
+  }
+  if (type === 'circleA') {
+    const r = pick([4, 5, 10]);
+    const ans = Math.round(3.14 * r * r * 100) / 100;
+    return make(`圓形半徑 ${r} cm，面積是多少？〈取 π = 3.14〉`, `${ans} cm²`,
+      [`${Math.round(2 * 3.14 * r * 10) / 10} cm²`, `${r * r} cm²`, `${Math.round(3.14 * 2 * r * 10) / 10} cm²`],
+      `圓面積 = π × r² = 3.14 × ${r} × ${r} = <b>${ans} cm²</b>。`, circleViz(r));
+  }
+  if (type === 'trapezium') {
+    const a = ri(4, 9), b = ri(a + 2, 15); const h = 2 * ri(2, 6);
+    const ans = (a + b) * h / 2;
+    return make(`梯形上底 ${a} cm、下底 ${b} cm、高 ${h} cm，面積是多少？`, `${ans} cm²`,
+      [`${(a + b) * h} cm²`, `${a + b + h} cm²`, `${ans + 10} cm²`],
+      `梯形面積 = (上底 + 下底) × 高 ÷ 2 = (${a} + ${b}) × ${h} ÷ 2 = <b>${ans} cm²</b>。`, trapeziumViz(a, b, h));
+  }
+  if (type === 'cuboid') {
+    const a = ri(3, 8), b = ri(2, 7), c = ri(2, 6);
+    const ans = a * b * c;
+    return make(`長方體長 ${a} cm、闊 ${b} cm、高 ${c} cm，體積是多少？`, `${ans} cm³`,
+      [`${a + b + c} cm³`, `${2 * (a * b + b * c + a * c)} cm³`, `${a * b} cm³`],
+      `長方體體積 = 長 × 闊 × 高 = ${a} × ${b} × ${c} = <b>${ans} cm³</b>。`, cuboidViz(a, b, c));
+  }
+  if (type === 'pyth') {
+    const k = ri(2, 5), a = 3 * k, b = 4 * k, c = 5 * k;
+    return make(`直角三角形兩條直角邊分別是 ${a} cm 和 ${b} cm，斜邊是多少？`, `${c} cm`,
+      [`${a + b} cm`, `${Math.abs(a - b)} cm`, `${c + 2} cm`],
+      `畢氏定理：a² + b² = c²。${a}² + ${b}² = ${a * a} + ${b * b} = ${c * c}，所以斜邊 = <b>${c} cm</b>。`, pythViz(a, b, c));
+  }
+
+  return genGeometry(1, stage);
+}
+
+/* ---------- 4. 應用題沙漠 ---------- */
+function genWord(diff, stage) {
+  const sec = stage === 'secondary';
+  const base = { island: 'word', diff, kindLabel: '應用題' };
+  const names = ['阿澄', '小美', '家朗', '詠恩', '子謙', '樂兒'];
+  const name = pick(names);
+
+  const types = diff === 1
+    ? ['shopping', 'group', 'speedH', 'areaCost']
+    : diff === 2
+      ? ['average', 'discount', 'ratio', 'speedM', 'areaCost']
+      : (sec ? ['interest', 'profit', 'work', 'percentUp', 'twoItem'] : ['percentUp', 'work', 'twoItem', 'discount']);
+
+  const type = pick(types);
+
+  if (type === 'shopping') {
+    const price = ri(12, 45), qty = ri(2, 5);
+    const total = price * qty;
+    const paid = Math.ceil((total + ri(5, 35)) / 10) * 10;
+    const ans = paid - total;
+    return inputQ(Object.assign({}, base, {
+      prompt: `${name}買 ${qty} 本筆記簿，每本 $${price}。佢付咗 $${paid}，應找回多少元？`,
+      answer: ans, unit: '元',
+      hint: `先計 ${qty} 本筆記簿嘅總價：$${price} × ${qty}。`,
+      explain: `${qty} 本筆記簿共 $${price} × ${qty} = $${total}。找回 $${paid} − $${total} = <b>$${ans}</b>。`
+    }));
+  }
+  if (type === 'group') {
+    const groups = ri(3, 8), each = ri(4, 12), total = groups * each;
+    return inputQ(Object.assign({}, base, {
+      prompt: `${total} 粒糖平均分給 ${groups} 位同學，每人可分到多少粒？`,
+      answer: each, unit: '粒',
+      hint: `把 ${total} 平均分成 ${groups} 份。`,
+      explain: `${total} ÷ ${groups} = <b>${each}</b> 粒。`
+    }));
+  }
+  if (type === 'speedH') {
+    const speed = ri(6, 15), hours = ri(2, 4), ans = speed * hours;
+    return inputQ(Object.assign({}, base, {
+      prompt: `旅遊巴以每小時 ${speed} 公里行駛 ${hours} 小時，共行駛多少公里？`,
+      answer: ans, unit: '公里',
+      hint: '距離 = 速度 × 時間。',
+      explain: `距離 = ${speed} × ${hours} = <b>${ans}</b> 公里。`
+    }));
+  }
+  if (type === 'areaCost') {
+    const w = ri(3, 10), h = ri(3, 8), cost = ri(8, 20);
+    const ans = w * h * cost;
+    return inputQ(Object.assign({}, base, {
+      prompt: `一塊長方形草地長 ${w} m、闊 ${h} m。每平方米鋪草皮 $${cost}，共需多少元？`,
+      answer: ans, unit: '元',
+      hint: `先計草地嘅面積：${w} × ${h} 平方米。`,
+      explain: `面積 = ${w} × ${h} = ${w * h} m²。總費用 = ${w * h} × $${cost} = <b>$${ans}</b>。`
+    }));
+  }
+  if (type === 'average') {
+    const mean = ri(58, 88);
+    const patterns = [[-9, -3, 3, 9], [-6, -3, 3, 6], [-6, 0, 0, 6], [-3, 0, 0, 3], [-9, 0, 0, 9], [-3, -3, 3, 3]];
+    const off = pick(patterns);
+    const scores = off.map(o => mean + o);
+    const list = shuffle(scores);
+    return inputQ(Object.assign({}, base, {
+      prompt: `${name}四次數學測驗嘅分數係 ${list.join('、')}，平均分是多少？`,
+      answer: mean, unit: '分',
+      hint: '先把四個分數加起來，再除以 4。',
+      explain: `總分 = ${list.join(' + ')} = ${mean * 4}。平均分 = ${mean * 4} ÷ 4 = <b>${mean}</b> 分。`
+    }));
+  }
+  if (type === 'discount') {
+    const price = pick([200, 300, 400, 500, 800]);
+    const p = pick([10, 20, 25]);
+    const off = price * p / 100;
+    const ans = price - off;
+    return inputQ(Object.assign({}, base, {
+      prompt: `一件外套原價 $${price}，現在減價 ${p}%。售價是多少元？`,
+      answer: ans, unit: '元',
+      hint: `減價金額 = $${price} × ${p}%。`,
+      explain: `減價 $${price} × ${p}% = $${off}。售價 = $${price} − $${off} = <b>$${ans}</b>。`
+    }));
+  }
+  if (type === 'ratio') {
+    const a = pick([2, 3, 4]), b = pick([3, 5, 7]);
+    const k = ri(3, 8), given = a * k, ans = b * k;
+    return inputQ(Object.assign({}, base, {
+      prompt: `朱古力同糖果嘅數量比是 ${a} : ${b}。如果有 ${given} 粒朱古力，糖果有多少粒？`,
+      answer: ans, unit: '粒',
+      hint: `${given} 粒朱古力係 ${a} 份，先搵每份有多少粒。`,
+      explain: `每份 = ${given} ÷ ${a} = ${k} 粒。糖果有 ${b} 份：${k} × ${b} = <b>${ans}</b> 粒。`
+    }));
+  }
+  if (type === 'speedM') {
+    const minutes = pick([30, 45]);
+    const speed = minutes === 45 ? pick([8, 12, 16, 20]) : pick([8, 10, 12, 14]);
+    const ans = speed * minutes / 60;
+    return inputQ(Object.assign({}, base, {
+      prompt: `單車以每小時 ${speed} 公里行駛 ${minutes} 分鐘，即係行咗多少公里？`,
+      answer: ans, unit: '公里',
+      hint: `先把 ${minutes} 分鐘化做小時。`,
+      explain: `${minutes} 分鐘 = ${minutes}/60 小時 = ${minutes / 60} 小時。距離 = ${speed} × ${minutes / 60} = <b>${fmt(ans)}</b> 公里。`
+    }));
+  }
+  if (type === 'twoItem') {
+    const p1 = ri(8, 20), p2 = ri(15, 35), q1 = 3, q2 = 2;
+    const total = p1 * q1 + p2 * q2;
+    const paid = Math.ceil((total + ri(10, 50)) / 10) * 10;
+    const ans = paid - total;
+    return inputQ(Object.assign({}, base, {
+      prompt: `${name}買了 ${q1} 支筆（每支 $${p1}）和 ${q2} 本簿（每本 $${p2}），付咗 $${paid}，應找回多少元？`,
+      answer: ans, unit: '元',
+      hint: `分開計筆同簿嘅價錢，再加埋一齊。`,
+      explain: `筆：$${p1} × ${q1} = $${p1 * q1}；簿：$${p2} × ${q2} = $${p2 * q2}。共 $${total}，找回 $${paid} − $${total} = <b>$${ans}</b>。`
+    }));
+  }
+  if (type === 'percentUp') {
+    const price = pick([200, 300, 400, 500, 800]);
+    const p = pick([10, 15, 20, 25]);
+    const ans = price * (100 + p) / 100;
+    return inputQ(Object.assign({}, base, {
+      prompt: `一對球鞋原價 $${price}，加價 ${p}% 後售價是多少元？`,
+      answer: ans, unit: '元',
+      hint: `加價金額 = $${price} × ${p}%。`,
+      explain: `加價 $${price} × ${p}% = $${price * p / 100}。新售價 = $${price} + $${price * p / 100} = <b>$${ans}</b>。`
+    }));
+  }
+  if (type === 'work') {
+    const p1 = 6, d1 = pick([8, 10, 12]), p2 = pick([3, 4]);
+    if ((p1 * d1) % p2 !== 0) return genWord(diff, stage);
+    const ans = p1 * d1 / p2;
+    return inputQ(Object.assign({}, base, {
+      prompt: `一項工程由 ${p1} 位工人做，需要 ${d1} 日完成。如果由 ${p2} 位工人做，需要多少日？`,
+      answer: ans, unit: '日',
+      hint: '總工作量不變：人數 × 日數 = 總工作量。',
+      explain: `總工作量 = ${p1} × ${d1} = ${p1 * d1} 人日。${p2} 人做：${p1 * d1} ÷ ${p2} = <b>${ans}</b> 日。`
+    }));
+  }
+  if (type === 'interest') {
+    const principal = pick([2000, 3000, 4000, 5000, 8000]);
+    const rate = pick([3, 4, 5]);
+    const years = pick([2, 3]);
+    const ans = principal * rate * years / 100;
+    return inputQ(Object.assign({}, base, {
+      prompt: `把 $${principal} 存入銀行，年利率 ${rate}%，存 ${years} 年。單利息是多少元？`,
+      answer: ans, unit: '元',
+      hint: '單利息 = 本金 × 年利率 × 年數。',
+      explain: `利息 = ${principal} × ${rate}% × ${years} = <b>$${ans}</b>。`
+    }));
+  }
+  if (type === 'profit') {
+    const cost = pick([60, 80, 100, 120, 160]);
+    const p = pick([10, 20, 25]);
+    const ans = cost * p / 100;
+    return inputQ(Object.assign({}, base, {
+      prompt: `一件貨品成本 $${cost}，以 ${p}% 利潤售出。利潤是多少元？`,
+      answer: ans, unit: '元',
+      hint: '利潤 = 成本 × 利潤率。',
+      explain: `利潤 = $${cost} × ${p}% = <b>$${ans}</b>。`
+    }));
+  }
+
+  return genWord(1, stage);
+}
+
+/* ---------- 5. 方程山洞 ---------- */
+function genAlgebra(diff, stage) {
+  const sec = stage === 'secondary';
+  const base = { island: 'algebra', diff, kindLabel: '代數' };
+  const x = '<span class="x">x</span>';
+  const unk = '<span class="unk">?</span>';
+  const eq = html => `<div class="eqline">${html}</div>`;
+  const make = (prompt, visual, ans, explain) => inputQ(Object.assign({}, base, { prompt, visual, answer: ans, unit: '', hint: '記住：等式兩邊要同步做同一個動作。', explain }));
+
+  if (!sec) {
+    if (diff === 1) {
+      const type = pick(['add', 'sub', 'mul']);
+      if (type === 'add') {
+        const a = ri(3, 15), ans = ri(2, 12), b = a + ans;
+        return make('搵出 ? 代表嘅數。', eq(`${a} + ${unk} = ${b}`), ans,
+          `兩邊同時減 ${a}：? = ${b} − ${a} = <b>${ans}</b>。`);
+      }
+      if (type === 'sub') {
+        const ans = ri(2, 9), a = ri(2, 9), b = ans + a;
+        return make('搵出 ? 代表嘅數。', eq(`${b} − ${unk} = ${a}`), ans,
+          `兩邊同時加 ?，再整理：? = ${b} − ${a} = <b>${ans}</b>。`);
+      }
+      const a = ri(2, 9), ans = ri(2, 9), b = a * ans;
+      return make('搵出 ? 代表嘅數。', eq(`${unk} × ${a} = ${b}`), ans,
+        `兩邊同時除以 ${a}：? = ${b} ÷ ${a} = <b>${ans}</b>。`);
+    }
+    if (diff === 2) {
+      const type = pick(['two', 'div']);
+      if (type === 'two') {
+        const a = ri(2, 4), ans = ri(2, 9), b = ri(2, 9), c = a * ans + b;
+        return make('搵出 ? 代表嘅數。', eq(`${a} × ${unk} + ${b} = ${c}`), ans,
+          `兩邊先減 ${b}：${a} × ? = ${c - b}；再除以 ${a}：? = <b>${ans}</b>。`);
+      }
+      const a = ri(2, 4), q = ri(2, 7), ans = q * a, b = ri(2, 8), c = q + b;
+      return make('搵出 ? 代表嘅數。', eq(`${frac('?', a)} + ${b} = ${c}`), ans,
+        `兩邊先減 ${b}：? / ${a} = ${q}；再乘 ${a}：? = ${q} × ${a} = <b>${ans}</b>。`);
+    }
+    const type = pick(['bracket', 'three']);
+    if (type === 'bracket') {
+      const a = ri(2, 4), ans = ri(2, 7), b = ri(2, 6), c = a * (ans + b);
+      return make('搵出 ? 代表嘅數。', eq(`${a}(${unk} + ${b}) = ${c}`), ans,
+        `兩邊先除以 ${a}：? + ${b} = ${c / a}；再減 ${b}：? = <b>${ans}</b>。`);
+    }
+    const a = ri(2, 4), ans = ri(2, 8), b = ri(2, 8), c = a * ans - b;
+    return make('搵出 ? 代表嘅數。', eq(`${a} × ${unk} − ${b} = ${c}`), ans,
+      `兩邊先加 ${b}：${a} × ? = ${c + b}；再除以 ${a}：? = <b>${ans}</b>。`);
+  }
+
+  /* secondary */
+  if (diff === 2) {
+    const type = pick(['plus', 'minus', 'frac']);
+    if (type === 'plus') {
+      const a = ri(2, 6), ans = ri(2, 10), b = ri(2, 10), c = a * ans + b;
+      return make('解方程，求 x 的值。', eq(`${a}${x} + ${b} = ${c}`), ans,
+        `兩邊同時減 ${b}：${a}x = ${c - b}；兩邊除以 ${a}：x = <b>${ans}</b>。`);
+    }
+    if (type === 'minus') {
+      const a = ri(2, 6), ans = ri(2, 10), b = ri(2, 10), c = a * ans - b;
+      return make('解方程，求 x 的值。', eq(`${a}${x} − ${b} = ${c}`), ans,
+        `兩邊同時加 ${b}：${a}x = ${c + b}；兩邊除以 ${a}：x = <b>${ans}</b>。`);
+    }
+    const a = ri(2, 5), ans = ri(2, 8), b = ri(2, 8), c = ans + b;
+    return make('解方程，求 x 的值。', eq(`${frac(x, a)} + ${b} = ${c}`), ans,
+      `兩邊先減 ${b}：x / ${a} = ${c - b}；兩邊乘 ${a}：x = <b>${ans}</b>。`);
+  }
+
+  const type = pick(['bracket', 'both', 'fractions']);
+  if (type === 'bracket') {
+    const a = ri(2, 5), ans = ri(2, 8), b = ri(2, 6), c = a * (ans + b);
+    return make('解方程，求 x 的值。', eq(`${a}(${x} + ${b}) = ${c}`), ans,
+      `兩邊先除以 ${a}：x + ${b} = ${c / a}；再減 ${b}：x = <b>${ans}</b>。`);
+  }
+  if (type === 'both') {
+    const ans = ri(3, 7);
+    const b = 2 * ans + ri(3, 10);
+    const d = b - 2 * ans;
+    return make('解方程，求 x 的值。', eq(`2${x} + ${b} = 4${x} + ${d}`), ans,
+      `把 x 移去一邊：${b} − ${d} = 4x − 2x，即 ${b - d} = 2x；x = <b>${ans}</b>。`);
+  }
+  const ans = 6 * ri(1, 3);
+  const c = ans / 2 + ans / 3;
+  return make('解方程，求 x 的值。', eq(`${frac(x, 2)} + ${frac(x, 3)} = ${c}`), ans,
+    `通分：${frac('3x', 6)} + ${frac('2x', 6)} = ${frac('5x', 6)} = ${c}；x = ${c} × 6 ÷ 5 = <b>${ans}</b>。`);
+}
+
+/* ---------- 6. 數據燈塔 ---------- */
+function barViz(labels, values, unit = '本') {
+  const max = Math.max(...values, 1);
+  const base = 146, top = 36, chartH = 98;
+  const n = values.length;
+  const gap = 18, barW = Math.min(40, (250 - gap * (n - 1)) / n);
+  const totalW = barW * n + gap * (n - 1);
+  const x0 = 32 + (254 - totalW) / 2;
+  let grid = '';
+  for (let g = 0; g <= 4; g++) {
+    const y = base - chartH * g / 4;
+    grid += `<line x1="28" y1="${y}" x2="286" y2="${y}" stroke="#13343B" stroke-width=".7" opacity="${g === 0 ? .24 : .07}"/>`;
+  }
+  let bars = '';
+  values.forEach((v, i) => {
+    const h = Math.max(6, v / max * chartH);
+    const x = x0 + i * (barW + gap);
+    bars += `<rect x="${x}" y="${base - h}" width="${barW}" height="${h}" rx="5" fill="${i % 2 ? '#E8A21E' : '#16A394'}"/>
+      <text x="${x + barW / 2}" y="${base - h - 6}" text-anchor="middle" font-size="10" font-weight="800" fill="#13343B">${v}</text>
+      <text x="${x + barW / 2}" y="${base + 16}" text-anchor="middle" font-size="9.5" font-weight="700" fill="#547077">${labels[i]}</text>`;
+  });
+  return `<svg class="viz-svg" viewBox="0 0 300 180" role="img" aria-label="長條圖：${labels.map((l, i) => l + ' ' + values[i] + unit).join('，')}">
+    <text x="28" y="20" font-size="9" font-weight="800" fill="#879A9C">圖書館借書量（${unit}）</text>
+    ${grid}${bars}
+  </svg>`;
+}
+
+function genData(diff, stage) {
+  const sec = stage === 'secondary';
+  const base = { island: 'data', diff, kindLabel: '數據與概率' };
+
+  if (diff === 1 || (diff === 2 && rng() < .6) || (diff === 3 && rng() < .35)) {
+    const labels = ['一', '二', '三', '四'];
+    const pool = shuffle([5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
+    const values = pool.slice(0, 4);
+    const maxI = values.indexOf(Math.max(...values));
+    const minI = values.indexOf(Math.min(...values));
+    const total = values.reduce((a, b) => a + b, 0);
+    const type = diff === 1 ? pick(['max', 'min', 'total']) : pick(['diff', 'total', 'max']);
+    if (type === 'max') {
+      return choiceQ(Object.assign({}, base, {
+        prompt: '根據圖表，邊一日借出嘅圖書最多？',
+        correct: '星期' + labels[maxI],
+        wrongs: labels.filter((_, i) => i !== maxI).map(l => '星期' + l),
+        explain: `最高嘅長條係星期${labels[maxI]}，有 ${values[maxI]} 本。`,
+        visual: barViz(labels, values), center: false
+      }));
+    }
+    if (type === 'min') {
+      return choiceQ(Object.assign({}, base, {
+        prompt: '根據圖表，邊一日借出嘅圖書最少？',
+        correct: '星期' + labels[minI],
+        wrongs: labels.filter((_, i) => i !== minI).map(l => '星期' + l),
+        explain: `最低嘅長條係星期${labels[minI]}，有 ${values[minI]} 本。`,
+        visual: barViz(labels, values)
+      }));
+    }
+    if (type === 'total') {
+      return inputQ(Object.assign({}, base, {
+        prompt: '根據圖表，四日一共借出多少本圖書？',
+        answer: total, unit: '本',
+        hint: '把四條長條嘅數值加起來。',
+        explain: `${values.join(' + ')} = <b>${total}</b> 本。`,
+        visual: barViz(labels, values)
+      }));
+    }
+    const d = Math.abs(values[maxI] - values[minI]);
+    return inputQ(Object.assign({}, base, {
+      prompt: `根據圖表，借書最多嘅一日比最少嘅一日多多少本？`,
+      answer: d, unit: '本',
+      hint: `最多 ${values[maxI]} 本，最少 ${values[minI]} 本。`,
+      explain: `${values[maxI]} − ${values[minI]} = <b>${d}</b> 本。`,
+      visual: barViz(labels, values)
+    }));
+  }
+
+  if (diff === 2) {
+    const type = pick(['mean', 'range', 'mode', 'prob']);
+    if (type === 'mean') {
+      const mean = ri(6, 15);
+      const off = pick([[-3, -1, 1, 3], [-2, 0, 0, 2], [-4, 0, 0, 4], [-3, -3, 3, 3]]);
+      const nums = shuffle(off.map(o => mean + o));
+      return inputQ(Object.assign({}, base, {
+        prompt: `四個數 ${nums.join('、')} 的平均數是多少？`,
+        answer: mean, unit: '',
+        hint: '總和 ÷ 數量。',
+        explain: `總和 = ${nums.join(' + ')} = ${mean * 4}；平均數 = ${mean * 4} ÷ 4 = <b>${mean}</b>。`
+      }));
+    }
+    if (type === 'range') {
+      const nums = [ri(3, 20), ri(3, 20), ri(3, 20), ri(3, 20), ri(3, 20)];
+      const ans = Math.max(...nums) - Math.min(...nums);
+      return inputQ(Object.assign({}, base, {
+        prompt: `五個數 ${nums.join('、')} 的範圍（最大減最小）是多少？`,
+        answer: ans, unit: '',
+        hint: '先搵最大同最細嘅數。',
+        explain: `最大 ${Math.max(...nums)}，最小 ${Math.min(...nums)}，範圍 = <b>${ans}</b>。`
+      }));
+    }
+    if (type === 'mode') {
+      const mode = ri(4, 12);
+      const a = ri(13, 20), b = ri(13, 20);
+      const nums = shuffle([mode, mode, a, b, mode]);
+      return choiceQ(Object.assign({}, base, {
+        prompt: `五個數 ${nums.join('、')} 的眾數是多少？`,
+        correct: String(mode),
+        wrongs: [String(a), String(b), String(mode + 1)],
+        explain: `眾數係出現次數最多嘅數。${mode} 出現咗 3 次，所以眾數係 <b>${mode}</b>。`
+      }));
+    }
+    const p = pick([['擲一粒骰子，擲到偶數嘅機會是多少？', '1/2', ['1/3', '1/6', '1/4']],
+      ['擲一粒骰子，擲到 5 或 6 嘅機會是多少？', '1/3', ['1/2', '1/6', '2/3']],
+      ['擲一粒骰子，擲到 6 嘅機會是多少？', '1/6', ['1/3', '1/2', '1/5']]]);
+    return choiceQ(Object.assign({}, base, {
+      prompt: p[0], correct: frac(Number(p[1].split('/')[0]), Number(p[1].split('/')[1])),
+      wrongs: p[2].map(f => { const [a, b] = f.split('/'); return frac(Number(a), Number(b)); }),
+      explain: '機會 = 符合條件嘅結果數 ÷ 所有可能結果數。骰子有 6 個可能結果。',
+      center: true
+    }));
+  }
+
+  const type = pick(['median', 'missingMean', 'prob8', 'mean5']);
+  if (type === 'median') {
+    const nums = Array.from({ length: 5 }, () => ri(3, 20)).sort((a, b) => a - b);
+    const ans = nums[2];
+    return inputQ(Object.assign({}, base, {
+      prompt: `五個數 ${shuffle(nums).join('、')} 的中位數是多少？`,
+      answer: ans, unit: '',
+      hint: '先由小至大排列，再搵中間嘅數。',
+      explain: `排序後：${nums.join('、')}。中間嘅數係 <b>${ans}</b>。`
+    }));
+  }
+  if (type === 'missingMean') {
+    const mean = ri(6, 14);
+    const four = [ri(3, 18), ri(3, 18), ri(3, 18), ri(3, 18)];
+    const ans = mean * 5 - four.reduce((a, b) => a + b, 0);
+    if (ans <= 0 || ans > 20) return genData(diff, stage);
+    return inputQ(Object.assign({}, base, {
+      prompt: `五次測驗嘅平均分是 ${mean} 分。其中四次是 ${four.join('、')} 分，第五次是多少分？`,
+      answer: ans, unit: '分',
+      hint: `五次總分 = ${mean} × 5。`,
+      explain: `五次總分 = ${mean} × 5 = ${mean * 5}。第五次 = ${mean * 5} − (${four.join(' + ')}) = <b>${ans}</b> 分。`
+    }));
+  }
+  if (type === 'prob8') {
+    return choiceQ(Object.assign({}, base, {
+      prompt: '一個轉盤平均分成 8 格，分別寫上 1 至 8。轉到 3 嘅倍數嘅機會是多少？',
+      correct: frac(2, 8),
+      wrongs: [frac(3, 8), frac(1, 8), frac(1, 3)],
+      explain: '3 嘅倍數有 3 和 6，共 2 格。機會 = 2/8 = <b>1/4</b>。',
+      center: true
+    }));
+  }
+  const mean = ri(7, 15);
+  const off = [[-2, -1, 0, 1, 2], [-4, -1, 0, 2, 3], [-3, -2, 0, 2, 3]][ri(0, 2)];
+  const nums = shuffle(off.map(o => mean + o));
+  return inputQ(Object.assign({}, base, {
+    prompt: `五個數 ${nums.join('、')} 的平均數是多少？`,
+    answer: mean, unit: '',
+    hint: '總和 ÷ 5。',
+    explain: `總和 = ${nums.join(' + ')} = ${mean * 5}；平均數 = ${mean * 5} ÷ 5 = <b>${mean}</b>。`
+  }));
+}
+
+/* ---------- build a run ---------- */
+function genQuestion(island, diff, stage) {
+  if (island === 'volcano') return genVolcano(diff, stage);
+  if (island === 'fraction') return genFraction(diff, stage);
+  if (island === 'geometry') return genGeometry(diff, stage);
+  if (island === 'word') return genWord(diff, stage);
+  if (island === 'algebra') return genAlgebra(diff, stage);
+  if (island === 'data') return genData(diff, stage);
+  return genVolcano(1, stage);
+}
+
+function buildQuestions(islandId, diff, count, seedValue) {
+  seedRng(String(seedValue || (Date.now() + Math.random())));
+  const stage = S.player.stage;
+  const out = [];
+  const seen = new Set();
+  let guard = 0;
+  while (out.length < count && guard < 400) {
+    guard++;
+    let q;
+    try { q = genQuestion(islandId, diff, stage); } catch (e) { q = null; }
+    if (!q || !q.prompt) continue;
+    const key = textOf(q.prompt) + '|' + textOf(q.visual || '').slice(0, 30);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    q.island = islandId;
+    q.diff = diff;
+    q.id = uid('q');
+    out.push(q);
+  }
+  return out;
+}
+
+
+/* =========================================================
+   UI, run engine & screens
+   ========================================================= */
+const REVIEW_META = {
+  id:'review', name:'錯題特訓', short:'錯題特訓', topic:'針對練習',
+  c1:'#FF9A6A', c2:'#D9492A', accent:'#FFE08A', icon:'target',
+  tagline:'向答錯過嘅題目，再挑戰一次。',
+  desc:'逐題重練，答啱就自動標記為「已掌握」。'
+};
+
+const UI = {
+  view:'home', tab:'home',
+  overlay:null,
+  run:null, result:null,
+  filter:'all', openMistake:null,
+  timerId:null, toastTimer:null, demo:false,
+  wasPaused:false
+};
+
+const fmtDate = iso => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return `${d.getMonth() + 1}月${d.getDate()}日`;
+};
+const timeText = sec => {
+  if (sec < 60) return `${Math.max(1, Math.round(sec))} 秒`;
+  const m = Math.floor(sec / 60), s = Math.round(sec % 60);
+  return s ? `${m} 分 ${s} 秒` : `${m} 分鐘`;
+};
+const jsonClone = o => JSON.parse(JSON.stringify(o));
+
+/* ---------- badge / progress mutations ---------- */
+function checkBadges() {
+  const newly = [];
+  BADGES.forEach(b => {
+    if (!S.badges[b.id] && b.test()) {
+      S.badges[b.id] = new Date().toISOString();
+      newly.push(b);
+    }
+  });
+  return newly;
+}
+
+function recordMistake(q, value, timedOut) {
+  const yourHTML = value === null || value === undefined
+    ? '未作答'
+    : q.kind === 'choice'
+      ? (q.options[value] ?? '未作答')
+      : unitStr(Number(value), q.unit);
+  const correctHTML = q.kind === 'choice' ? q.options[q.answerIndex] : unitStr(q.answer, q.unit);
+  const existing = S.mistakes.find(m => !m.mastered && m.q && textOf(m.q.prompt) === textOf(q.prompt) && m.q.island === q.island);
+  if (existing) {
+    existing.attempts = (existing.attempts || 1) + 1;
+    existing.lastAt = new Date().toISOString();
+    existing.yourHTML = yourHTML;
+    existing.yourAnswer = textOf(yourHTML);
+    return;
+  }
+  S.mistakes.unshift({
+    id: uid('m'),
+    q: jsonClone(q),
+    yourAnswer: textOf(yourHTML),
+    yourHTML,
+    correctHTML,
+    createdAt: new Date().toISOString(),
+    lastAt: new Date().toISOString(),
+    mastered: false,
+    masteredAt: null,
+    attempts: 1
+  });
+  if (S.mistakes.length > 80) S.mistakes.length = 80;
+}
+
+function markMastered(id) {
+  const m = S.mistakes.find(x => x.id === id);
+  if (!m) return;
+  m.mastered = true;
+  m.masteredAt = new Date().toISOString();
+  const newly = checkBadges();
+  persist();
+  render({ keepScroll:true });
+  sfx('star');
+  toast(newly.length ? '徽章解鎖：' + newly.map(b => b.name).join('、') : '已標記為掌握，繼續保持！');
+}
+
+/* ---------- timer ---------- */
+function updateTimerDom(left) {
+  const run = UI.run;
+  if (!run || !run.q) return;
+  const total = run.q.timer || 1;
+  const fill = $('#timerFill'), num = $('#timerNum'), wrap = $('#timerWrap');
+  if (fill) fill.style.width = clamp(left / total * 100, 0, 100) + '%';
+  if (num) num.textContent = Math.max(0, Math.ceil(left)) + 's';
+  if (wrap) wrap.classList.toggle('warn', left <= 4.2);
+}
+function stopTimer() {
+  if (UI.timerId) { clearInterval(UI.timerId); UI.timerId = null; }
+  const run = UI.run;
+  if (run && run.timerEnd) {
+    run.timeLeft = Math.max(0, (run.timerEnd - Date.now()) / 1000);
+    run.timerEnd = null;
+  }
+}
+function startTimer() {
+  stopTimer();
+  const run = UI.run;
+  if (!run || !run.q || !run.q.timer || run.feedback) return;
+  if (run.timeLeft == null) run.timeLeft = run.q.timer;
+  run.timerEnd = Date.now() + run.timeLeft * 1000;
+  UI.timerId = setInterval(() => {
+    if (!UI.run || UI.run !== run || !run.timerEnd) return;
+    const left = Math.max(0, (run.timerEnd - Date.now()) / 1000);
+    run.timeLeft = left;
+    updateTimerDom(left);
+    if (left <= 0) {
+      stopTimer();
+      submitAnswer(null, true);
+    }
+  }, 100);
+  updateTimerDom(run.timeLeft);
+}
+
+/* ---------- sound ---------- */
+let audioCtx = null;
+let soundUnlocked = false;
+document.addEventListener('pointerdown', () => { soundUnlocked = true; }, { once:true });
+document.addEventListener('keydown', () => { soundUnlocked = true; }, { once:true });
+function sfx(type) {
+  if (!S.settings.sound || !soundUnlocked) return;
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    audioCtx = audioCtx || new AC();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+    const notes = type === 'correct' ? [523.25, 783.99]
+      : type === 'wrong' ? [196, 155]
+        : type === 'star' ? [523.25, 659.25, 783.99, 1046.5]
+          : type === 'level' ? [392, 523.25, 659.25, 783.99]
+            : [660];
+    notes.forEach((f, i) => {
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = type === 'wrong' ? 'triangle' : 'sine';
+      o.frequency.value = f;
+      const t = now + i * (type === 'star' ? 0.09 : 0.1);
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(type === 'wrong' ? .055 : .04, t + .012);
+      g.gain.exponentialRampToValueAtTime(.0001, t + (type === 'wrong' ? .24 : .28));
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(t); o.stop(t + .3);
+    });
+  } catch (e) { /* audio is a bonus, never block the game */ }
+}
+
+function toast(msg) {
+  const root = $('#toast-root');
+  if (!root) return;
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  root.appendChild(el);
+  setTimeout(() => { el.classList.add('leaving'); setTimeout(() => el.remove(), 260); }, 2500);
+}
+
+function confetti(n = 34) {
+  const root = $('#fx-root');
+  if (!root) return;
+  const colors = ['#FFC24B', '#FF6B4A', '#16A394', '#FFE08A', '#7B5CF0', '#4FA85E'];
+  for (let i = 0; i < n; i++) {
+    const s = document.createElement('span');
+    s.className = 'confetti';
+    s.style.left = (Math.random() * 100) + '%';
+    s.style.background = colors[i % colors.length];
+    s.style.setProperty('--dur', (1.8 + Math.random() * 1.8) + 's');
+    s.style.setProperty('--delay', (Math.random() * .45) + 's');
+    s.style.setProperty('--rot', (Math.random() * 360) + 'deg');
+    s.style.setProperty('--drift', (Math.random() * 160 - 80) + 'px');
+    if (i % 4 === 0) { s.style.width = '5px'; s.style.height = '14px'; }
+    root.appendChild(s);
+    setTimeout(() => s.remove(), 4200);
+  }
+}
+
+/* =========================================================
+   Reusable components
+   ========================================================= */
+function topbarHTML() {
+  return `<header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">${icon('island', 25)}</span>
+      <span class="brand-name">數字冒險島<em>NUMBER ISLAND</em></span>
+    </div>
+    <div class="top-actions">
+      <span class="streak-pill" title="連續冒險日數">${icon('flame', 14)}<b>${S.player.streak}</b>日</span>
+      <button class="avatar" data-act="tab" data-tab="progress" aria-label="開啟個人進度">${esc(S.player.name.slice(0, 1))}</button>
+    </div>
+  </header>`;
+}
+
+function tabbarHTML(active) {
+  const items = [['home', '地圖', 'map'], ['mistakes', '錯題', 'book'], ['badges', '徽章', 'medal'], ['progress', '進度', 'chart']];
+  const open = openMistakes().length;
+  return `<nav class="tabbar" aria-label="主要導航">${items.map(([id, label, ic]) => `
+    <button class="tab ${active === id ? 'active' : ''}" data-act="tab" data-tab="${id}" ${active === id ? 'aria-current="page"' : ''}>
+      ${icon(ic, 21)}
+      <span>${label}</span>
+      ${id === 'mistakes' && open ? `<span class="badge-dot">${open}</span>` : ''}
+    </button>`).join('')}</nav>`;
+}
+
+function heroHTML() {
+  const li = levelInfo(S.player.xp);
+  const name = esc(S.player.name);
+  return `<section class="hero">
+    <div class="hero-sun" aria-hidden="true"></div>
+    <svg class="hero-waves" viewBox="0 0 390 72" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 44c42-16 78 8 122 4 40-4 58-18 98-16 52 3 72 20 170 4v36H0z" fill="#0A4E5C" opacity=".55"/>
+      <path d="M0 58c46-12 76 6 118 3 36-3 64-14 102-10 52 6 76 15 170 2v19H0z" fill="#06343E" opacity=".55"/>
+    </svg>
+    <div class="hero-copy">
+      <p class="hero-date">${todayLabel()} · 第 ${S.player.streak} 日冒險</p>
+      <h1 class="hero-title">${greeting()}，${name}！<br>今日去邊個<span>島</span>？</h1>
+      <div class="hero-level">
+        <span class="lvl-chip">Lv.${li.level}</span>
+        <div class="lvl-info">
+          <b>${li.rank} · ${fmt(S.player.xp)} XP</b>
+          <div class="lvl-bar"><i style="width:${li.pct}%"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-sticker">出發啦！</div>
+    <div class="hero-mascot">${mascot('happy')}</div>
+  </section>`;
+}
+
+function questsHTML() {
+  const q = questState();
+  const item = (ic, label, val, target, done) => `
+    <div class="quest ${done ? 'done' : ''}">
+      ${done ? `<span class="quest-done-mark">${icon('check', 8)}</span>` : ''}
+      <span class="quest-ico">${icon(ic, 14)}</span>
+      <div class="quest-label">${label}</div>
+      <div class="quest-bar"><i style="width:${clamp(val / target * 100, 0, 100)}%"></i></div>
+      <div class="quest-num">${Math.min(val, target)} / ${target}</div>
+    </div>`;
+  return `<section class="quests">
+    <div class="quest-head">
+      <span class="quest-title">今日任務</span>
+      <span class="quest-reward">${icon('sparkle', 10)} +50 XP</span>
+      <span class="quest-count">${q.count} / 3</span>
+    </div>
+    <div class="quest-grid">
+      ${item('book', '答 10 題', q.answered, 10, q.answered >= 10)}
+      ${item('flag', '完成 1 關', q.cleared, 1, q.cleared >= 1)}
+      ${item('refresh', '重溫 2 題', q.reviewed, 2, q.reviewed >= 2)}
+    </div>
+  </section>`;
+}
+
+const NODE_POS = [[28, 66], [72, 200], [26, 334], [74, 468], [28, 602], [71, 736]];
+const nextIslandIndex = () => ISLANDS.findIndex((is, i) => isUnlocked(i) && bestStars(is.id) === 0);
+
+function nodeHTML(island, i) {
+  const pos = NODE_POS[i];
+  const locked = !isUnlocked(i);
+  const best = bestStars(island.id);
+  const isNext = !locked && i === nextIslandIndex();
+  return `<button class="node ${locked ? 'is-locked' : ''} ${isNext ? 'is-next' : ''}"
+    style="left:${pos[0]}%;top:${pos[1]}px;--c1:${island.c1};--c2:${island.c2}"
+    data-act="island" data-id="${island.id}" aria-label="${island.name}，${locked ? '未解鎖' : best + ' 星'}" ${locked ? 'aria-disabled="true"' : ''}>
+    ${isNext ? '<span class="node-here">你喺度</span>' : ''}
+    <span class="node-circle">
+      <span class="node-no">0${i + 1}</span>
+      ${locked ? icon('lock', 27) : islandIcon(island.id, 40)}
+    </span>
+    <span class="node-name">${island.name}</span>
+    <span class="node-foot">
+      ${locked ? `<span class="node-lock">${icon('lock', 9)} 未解鎖</span>` : starsHtml(best, 11)}
+    </span>
+  </button>`;
+}
+
+function mapHTML() {
+  return `<div class="map-head">
+      <h2>冒險地圖<span>6 個島嶼</span></h2>
+      <span class="map-legend">${icon('medal', 11)} ${Object.keys(S.badges).length} / ${BADGES.length} 徽章</span>
+    </div>
+    <div class="map-wrap">
+      <div class="map-card">
+        ${mapScenery()}
+        <svg class="map-path" viewBox="0 0 362 836" preserveAspectRatio="none" fill="none" aria-hidden="true">
+          <path d="M101 108C168 126 208 198 261 242S128 332 94 376S226 464 268 510S142 598 101 644S214 736 257 778"
+            stroke="#C9B07A" stroke-width="2.4" stroke-dasharray="1 9" stroke-linecap="round" vector-effect="non-scaling-stroke" opacity=".62"/>
+        </svg>
+        <div class="map-nodes">${ISLANDS.map(nodeHTML).join('')}</div>
+      </div>
+    </div>
+    <div class="map-foot">${icon('info', 12)} 完成上一個島嶼任何關卡，即可解鎖下一個島。更多島嶼開發中。</div>`;
+}
+
+function homeView() {
+  return `${topbarHTML()}
+    <div class="scroll">${heroHTML()}${questsHTML()}${mapHTML()}</div>
+    ${tabbarHTML('home')}`;
+}
+
+/* =========================================================
+   Island sheet
+   ========================================================= */
+function sheetHTML(id) {
+  const island = getIsland(id);
+  if (!island) return '';
+  const total = starSum(id);
+  return `<section class="sheet" role="dialog" aria-modal="true" aria-label="${island.name}">
+    <div class="sheet-hero" style="--c1:${island.c1};--c2:${island.c2}">
+      <button class="sheet-close" data-act="close" aria-label="關閉">${icon('x', 15)}</button>
+      <div class="sheet-head">
+        <span class="sheet-ico">${islandIcon(id, 34)}</span>
+        <div>
+          <h2>${island.name}</h2>
+          <p>${island.tagline}</p>
+          <div class="sheet-starline">${starsHtml(bestStars(id), 11)} 已收集 ${total} / 9 粒星</div>
+        </div>
+      </div>
+    </div>
+    <div class="sheet-body">
+      <div class="sheet-hint">${icon('target', 12)} 難度越深，題目越豐富，最多可攞 3 星</div>
+      ${DIFFS.map(d => {
+        const best = S.islands[id].stars[d.id] || 0;
+        return `<button class="diff" data-act="start" data-island="${id}" data-diff="${d.id}" style="--dc:${d.color};--ds:${d.soft}">
+          <div class="diff-main">
+            <div class="diff-name">${d.name}<span class="diff-badge">${d.tag}</span></div>
+            <div class="diff-meta">${d.meta} · ${d.desc}</div>
+            <div class="diff-stars">${starsHtml(best, 11)}<em>最佳 ${best} 星</em></div>
+          </div>
+          <span class="diff-play">${icon('play', 17)}</span>
+        </button>`;
+      }).join('')}
+      <div class="sheet-note">${icon('info', 12)} ${island.desc}</div>
+      <div class="sheet-note">${icon('book', 12)} 答錯嘅題目會自動收入錯題簿，可以隨時重練。</div>
+    </div>
+  </section>`;
+}
+
+function badgeModalHTML(id) {
+  const b = BADGES.find(x => x.id === id);
+  if (!b) return '';
+  const earned = S.badges[id];
+  return `<div class="modal" role="dialog" aria-modal="true" aria-label="${b.name}">
+    ${medalHtml(b)}
+    <h3>${b.name}</h3>
+    <p>${b.desc}</p>
+    <div class="badge-cond"><b>解鎖條件</b><br>${b.hint}</div>
+    <div style="font-size:10px;font-weight:800;color:${earned ? 'var(--leaf-dark)' : 'var(--ink-3)'};margin-bottom:15px">
+      ${earned ? '已於 ' + fmtDate(earned) + ' 獲得' : '仲未解鎖，繼續探險啦！'}
+    </div>
+    <div class="modal-actions"><button class="btn primary" data-act="close">繼續探險</button></div>
+  </div>`;
+}
+
+function nameModalHTML() {
+  return `<div class="modal" role="dialog" aria-modal="true" aria-label="更改名字">
+    <h3>你叫咩名？</h3>
+    <p>呢個名會顯示喺地圖同進度頁，唔會上傳。</p>
+    <input class="name-input" id="nameInput" maxlength="10" value="${esc(S.player.name)}" aria-label="探險家名字" autocomplete="off">
+    <div class="modal-actions">
+      <button class="btn secondary" data-act="close">取消</button>
+      <button class="btn primary" data-act="save-name">儲存</button>
+    </div>
+  </div>`;
+}
+
+function quitModalHTML() {
+  return `<div class="modal" role="dialog" aria-modal="true" aria-label="放棄冒險">
+    <h3>放棄今次冒險？</h3>
+    <p>已經答過嘅題目會照樣記錄，但今次關卡唔會完成，亦唔會計星。</p>
+    <div class="modal-actions">
+      <button class="btn secondary" data-act="close">繼續玩</button>
+      <button class="btn primary" data-act="confirm-quit">放棄</button>
+    </div>
+  </div>`;
+}
+
+function resetModalHTML() {
+  return `<div class="modal" role="dialog" aria-modal="true" aria-label="重設進度">
+    <h3>重設所有進度？</h3>
+    <p>等級、星數、徽章同錯題簿都會清空，<b>無法復原</b>。試玩完想重新開始，先用呢個。</p>
+    <div class="modal-actions">
+      <button class="btn secondary" data-act="close">取消</button>
+      <button class="btn primary" data-act="confirm-reset">重設</button>
+    </div>
+  </div>`;
+}
+
+function renderOverlay() {
+  const root = $('#overlay-root');
+  if (!root) return;
+  if (!UI.overlay) { root.innerHTML = ''; return; }
+  const o = UI.overlay;
+  let inner = '';
+  let cls = 'overlay';
+  if (o.type === 'island') {
+    inner = sheetHTML(o.id);
+  } else if (o.type === 'badge') {
+    cls = 'overlay center'; inner = badgeModalHTML(o.id);
+  } else if (o.type === 'name') {
+    cls = 'overlay center'; inner = nameModalHTML();
+  } else if (o.type === 'quit') {
+    cls = 'overlay center'; inner = quitModalHTML();
+  } else if (o.type === 'reset') {
+    cls = 'overlay center'; inner = resetModalHTML();
+  }
+  root.innerHTML = `<div class="${cls}" data-act="backdrop">${inner}</div>`;
+  if (o.type === 'name') {
+    setTimeout(() => { const inp = $('#nameInput'); if (inp) { inp.focus(); inp.select(); } }, 60);
+  }
+}
+
+/* =========================================================
+   Play screen
+   ========================================================= */
+function runIslandMeta(run) {
+  return run.mode === 'review' ? REVIEW_META : getIsland(run.islandId);
+}
+
+function optionClass(q, i, fb) {
+  if (!fb) return '';
+  const chosen = fb.value === i;
+  if (q.answerIndex === i) return 'correct';
+  if (chosen) return 'wrong';
+  return 'dim';
+}
+
+function playHTML() {
+  const run = UI.run;
+  if (!run) return '';
+  const island = runIslandMeta(run);
+  const q = run.q;
+  const fb = run.feedback;
+  const diff = run.mode === 'review' ? { name:'錯題重練' } : getDiff(run.diff);
+  const last = run.index >= run.questions.length - 1 || run.hearts <= 0;
+  const progress = run.questions.map((_, i) => {
+    const r = run.results[i];
+    return `<div class="seg ${r === 'ok' ? 'ok' : r === 'miss' ? 'miss' : i === run.index ? 'cur' : ''}"><i></i></div>`;
+  }).join('');
+
+  const options = q.kind === 'choice' ? `<div class="options ${q.optionCols === 3 ? 'cols-3' : ''}">
+    ${q.options.map((o, i) => `<button class="opt ${optionClass(q, i, fb)} ${String(o).length <= 3 ? 'center' : ''}" data-act="answer" data-index="${i}" ${fb ? 'disabled' : ''}>
+      <span class="opt-key">${'ABCD'[i]}</span>
+      <span class="opt-body">${o}</span>
+    </button>`).join('')}
+  </div>` : '';
+
+  let inputArea = '';
+  if (q.kind === 'input') {
+    const shown = fb ? (fb.value === null || fb.value === undefined ? '未作答' : String(fb.value).replace('-', '−')) : (run.input || '');
+    const hasInput = !!run.input;
+    inputArea = `
+      <div class="answer-display">
+        ${shown ? `<span class="answer-value">${esc(shown)}</span>` : `<span class="answer-value placeholder">輸入答案</span>`}
+        ${q.unit ? `<span class="answer-unit">${q.unit === '元' ? '元' : q.unit}</span>` : ''}
+        ${!fb ? `<button class="answer-del" data-act="key" data-key="del" aria-label="刪除最後一個字">${icon('backspace', 17)}</button>` : ''}
+      </div>
+      ${!fb ? `<div class="keypad">
+        ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button class="key" data-act="key" data-key="${n}">${n}</button>`).join('')}
+        <button class="key" data-act="key" data-key="sign" aria-label="正負號">±</button>
+        <button class="key" data-act="key" data-key="0">0</button>
+        <button class="key" data-act="key" data-key="dot">.</button>
+      </div>
+      <button class="keypad-submit" data-act="submit" ${hasInput ? '' : 'disabled'}>確認答案 ${icon('arrow', 15)}</button>` : ''}
+      ${!fb && q.hint ? `<button class="hint-btn" data-act="hint">${icon('bulb', 13)} ${run.hint ? '收起提示' : '需要提示？'}</button>` : ''}
+      ${!fb && run.hint && q.hint ? `<div class="hint-box">${q.hint}</div>` : ''}
+    `;
+  }
+
+  let feedback = '';
+  if (fb) {
+    const title = fb.ok ? '答啱喇！' : fb.timeout ? '時間到！' : '差少少。';
+    const gain = fb.ok ? (10 + Math.min(run.combo, 6) * 2) : 0;
+    feedback = `<div class="feedback ${fb.ok ? 'ok' : 'bad'}">
+      <div class="fb-head">
+        <span class="fb-ico">${icon(fb.ok ? 'check' : 'x', 14)}</span>
+        ${title}
+        ${fb.ok && gain ? `<small>+${gain} XP</small>` : ''}
+      </div>
+      <div class="fb-explain">
+        ${!fb.ok ? `<div style="margin-bottom:5px">正確答案：<b>${fb.answerHTML}</b></div>` : ''}
+        ${q.explain}
+      </div>
+      <button class="fb-btn" data-act="next">${last ? '完成冒險' : '繼續'} ${icon('arrow', 15)}</button>
+    </div>`;
+  }
+
+  const promptClass = q.center ? 'center' : (q.island === 'word' || textOf(q.prompt).length > 32) ? 'word' : '';
+  return `<div class="play ${q.kind === 'input' ? 'input-mode' : ''}" style="--c1:${island.c1}">
+    <div class="play-doodle" style="right:18px;top:43%;font-size:150px" aria-hidden="true">×</div>
+    <div class="play-doodle" style="left:18px;bottom:172px;font-size:96px" aria-hidden="true">÷</div>
+    <header class="play-top">
+      <button class="icon-btn" data-act="quit" aria-label="返回地圖">${icon('x', 18)}</button>
+      <div class="play-title"><span class="dot"></span>${run.mode === 'review' ? '錯題特訓' : island.short}<em>${diff.name}</em></div>
+      <div class="hearts" aria-label="剩餘生命 ${run.hearts}">${[0, 1, 2, 3].map(i => `<svg class="heart ${i >= run.hearts ? 'lost' : ''}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21c-.6 0-1.1-.2-1.6-.6C5.7 16.7 3 14 3 10.2 3 7.3 5.2 5 8.1 5c1.6 0 3.1.7 3.9 1.9C12.8 5.7 14.3 5 15.9 5 18.8 5 21 7.3 21 10.2c0 3.8-2.7 6.5-7.4 10.2-.5.4-1 .6-1.6.6z"/></svg>`).join('')}</div>
+    </header>
+    <div class="seg-row" aria-hidden="true">${progress}</div>
+    ${q.timer ? `<div class="timer ${((run.timeLeft ?? q.timer) <= 4) ? 'warn' : ''}" id="timerWrap"><div class="timer-track"><div class="timer-fill" id="timerFill" style="width:${clamp((run.timeLeft ?? q.timer) / q.timer * 100, 0, 100)}%"></div></div><span class="timer-num" id="timerNum">${Math.max(0, Math.ceil(run.timeLeft ?? q.timer))}s</span></div>` : ''}
+    <div class="play-meta">
+      <span class="qcount">第 ${run.index + 1} / ${run.questions.length} 題${run.mode === 'review' ? ' · 答啱即掌握' : ''}</span>
+      <span class="combo ${run.combo >= 2 ? 'on' : ''}">${icon('flame', 11)} 連擊 ×${run.combo}</span>
+    </div>
+    <div class="play-scroll">
+      <section class="q-card">
+        <div class="q-eyebrow"><b>${run.mode === 'review' ? '錯題重練' : island.topic}</b> · ${diff.name}</div>
+        <h2 class="q-prompt ${promptClass}">${q.prompt}</h2>
+        ${q.visual ? `<div class="q-visual">${q.visual}</div>` : ''}
+        ${options}
+        ${inputArea}
+        ${feedback}
+      </section>
+      <div class="play-buddy">
+        ${mascot(fb ? (fb.ok ? 'cheer' : 'oops') : 'think')}
+        <div class="buddy-bubble">${buddyText(run)}</div>
+      </div>
+    </div>
+    <div class="play-foot">${icon('bulb', 12)} ${playTip(run)}</div>
+  </div>`;
+}
+
+function buddyText(run) {
+  if (run.feedback) return run.feedback.ok ? '答得啱！保持呢個節奏。' : '唔緊要，錯咗先知道邊度要練。';
+  if (run.mode === 'review') return '慢慢嚟，答啱就會自動掌握。';
+  if (run.islandId === 'volcano') return '深呼吸，計清楚先撳。';
+  if (run.islandId === 'fraction') return '慢慢計，唔使同人鬥快。';
+  if (run.islandId === 'geometry') return '圖入面嘅數字，就係線索。';
+  if (run.islandId === 'algebra') return '一步一步拆開，唔難嘅。';
+  return '睇清楚先撳，你可以嘅。';
+}
+
+function playTip(run) {
+  if (run.mode === 'review') return '答啱就會自動標記為「已掌握」，答錯可以再試。';
+  if (run.islandId === 'volcano') return '快手之餘，記得先乘除、後加減。';
+  if (run.islandId === 'fraction') return '分母唔同，先通分再計；答案記得化簡。';
+  if (run.islandId === 'geometry') return '可以喺草稿紙畫一畫，圖形會清楚好多。';
+  if (run.islandId === 'word') return '慢慢讀一次題目，搵出已知同未知。';
+  if (run.islandId === 'algebra') return '等式兩邊要同步做同一個動作。';
+  return '答錯唔緊要，錯題會自動留低俾你重練。';
+}
+
+function startRun(islandId, diff, opts = {}) {
+  const island = opts.mode === 'review' ? REVIEW_META : getIsland(islandId);
+  if (!island) return;
+  const d = getDiff(diff) || DIFFS[1];
+  let questions = opts.questions;
+  if (!questions) {
+    const count = d.count;
+    questions = buildQuestions(islandId, diff, count, opts.seed || (Date.now() + '-' + Math.random()));
+    if (!questions.length) { toast('題目生成失敗，請再試一次。'); return; }
+  }
+  const run = {
+    mode: opts.mode || 'normal',
+    islandId, diff,
+    questions,
+    index: 0,
+    q: questions[0],
+    correct: 0, wrong: 0,
+    combo: 0, maxCombo: 0,
+    hearts: 4,
+    feedback: null,
+    results: [],
+    input: '',
+    hint: false,
+    timeLeft: questions[0].timer || null,
+    timerEnd: null,
+    startedAt: Date.now(),
+    mastered: 0,
+    demo: !!opts.demo
+  };
+  if (opts.index && opts.index > 0 && opts.index < questions.length) {
+    run.index = opts.index;
+    run.q = questions[opts.index];
+    run.timeLeft = run.q.timer || null;
+  }
+  UI.run = run;
+  UI.view = 'play';
+  UI.overlay = null;
+  UI.result = null;
+  render();
+  if (!opts.demoPaused) startTimer();
+}
+
+function startReview(list) {
+  if (!list || !list.length) { toast('而家冇待重練嘅錯題。'); return; }
+  const qs = list.slice(0, 6).map(m => Object.assign(jsonClone(m.q), { mistakeId:m.id }));
+  startRun(qs[0].island || 'volcano', 2, { questions:qs, mode:'review' });
+}
+
+function submitAnswer(value, timeout = false) {
+  const run = UI.run;
+  if (!run || run.feedback) return;
+  stopTimer();
+  const q = run.q;
+  let ok = false;
+  if (q.kind === 'choice') ok = value === q.answerIndex;
+  else {
+    const n = Number(value);
+    ok = value !== null && value !== '' && isFinite(n) && Math.abs(n - q.answer) <= 0.011;
+  }
+  if (value !== null && value !== undefined) run.input = String(value);
+  if (ok) {
+    run.correct++;
+    run.combo++;
+    run.maxCombo = Math.max(run.maxCombo, run.combo);
+    sfx('correct');
+  } else {
+    run.wrong++;
+    run.combo = 0;
+    run.hearts = Math.max(0, run.hearts - 1);
+    sfx('wrong');
+    recordMistake(q, value, timeout);
+  }
+  if (q.mistakeId && ok) {
+    const m = S.mistakes.find(x => x.id === q.mistakeId);
+    if (m && !m.mastered) { m.mastered = true; m.masteredAt = new Date().toISOString(); run.mastered++; }
+  }
+  run.results[run.index] = ok ? 'ok' : 'miss';
+  S.stats.answered++;
+  S.stats.correct += ok ? 1 : 0;
+  S.stats.bestCombo = Math.max(S.stats.bestCombo, run.maxCombo);
+  S.daily.answered++;
+  S.daily.correct += ok ? 1 : 0;
+  const dayKey = todayKey();
+  if (!S.stats.days[dayKey]) S.stats.days[dayKey] = { answered:0, correct:0, minutes:0 };
+  S.stats.days[dayKey].answered++;
+  S.stats.days[dayKey].correct += ok ? 1 : 0;
+  run.feedback = {
+    ok, timeout, value,
+    answerHTML: q.kind === 'choice' ? q.options[q.answerIndex] : unitStr(q.answer, q.unit),
+    yourHTML: value === null ? '未作答' : q.kind === 'choice' ? q.options[value] : unitStr(Number(value), q.unit)
+  };
+  persist();
+  render({ keepScroll:true });
+  const card = $('.feedback');
+  if (card) setTimeout(() => card.scrollIntoView({ behavior:'smooth', block:'nearest' }), 90);
+}
+
+function nextQuestion() {
+  const run = UI.run;
+  if (!run) return;
+  if (run.hearts <= 0 || run.index >= run.questions.length - 1) { finishRun(); return; }
+  run.index++;
+  run.q = run.questions[run.index];
+  run.feedback = null;
+  run.input = '';
+  run.hint = false;
+  run.timeLeft = run.q.timer || null;
+  render();
+  startTimer();
+}
+
+function quitRun() {
+  stopTimer();
+  UI.run = null;
+  UI.overlay = null;
+  UI.result = null;
+  UI.view = 'home';
+  UI.tab = 'home';
+  render();
+}
+
+/* =========================================================
+   Finish / result
+   ========================================================= */
+function finishRun() {
+  const run = UI.run;
+  if (!run) return;
+  stopTimer();
+  const elapsed = Math.max(1, Math.round((Date.now() - run.startedAt) / 1000));
+  const answered = run.correct + run.wrong;
+  const acc = answered ? Math.round(run.correct / answered * 100) : 0;
+  const failed = run.hearts <= 0 || (run.mode === 'normal' && acc < 40);
+  let stars = 0;
+  if (run.mode === 'normal' && !failed) {
+    stars = run.wrong <= 1 ? 3 : run.wrong <= 2 ? 2 : 1;
+  }
+  const island = getIsland(run.islandId);
+  const prevBest = island ? (S.islands[run.islandId].stars[run.diff] || 0) : 0;
+  const firstClear = run.mode === 'normal' && prevBest === 0 && stars > 0;
+  let xp = 0;
+  if (run.mode === 'review') {
+    xp = run.correct * 5 + 10;
+  } else {
+    xp = run.correct * 10 + Math.min(run.maxCombo, 10) * 2 + stars * 15 + (stars > 0 ? 10 : 0) + (firstClear ? 20 : 0);
+  }
+  const levelBefore = levelInfo(S.player.xp).level;
+  const islandIdx = ISLANDS.findIndex(i => i.id === run.islandId);
+  const nextIsland = islandIdx >= 0 ? ISLANDS[islandIdx + 1] : null;
+  const nextWasLocked = nextIsland ? !isUnlocked(islandIdx + 1) : false;
+
+  if (run.mode === 'normal' && island) {
+    const rec = S.islands[run.islandId];
+    rec.plays = (rec.plays || 0) + 1;
+    if (stars > prevBest) rec.stars[run.diff] = stars;
+    if (stars === 3 && rec.failed[run.diff]) { S.stats.comeback++; delete rec.failed[run.diff]; }
+    if (stars === 0) rec.failed[run.diff] = true;
+    S.stats.runs++;
+    if (run.wrong === 0 && answered >= 1 && stars > 0) S.stats.perfectRuns++;
+    if (stars > 0) S.daily.cleared++;
+  }
+  S.stats.timeSec += elapsed;
+  {
+    const dk = todayKey();
+    if (!S.stats.days[dk]) S.stats.days[dk] = { answered:0, correct:0, minutes:0 };
+    S.stats.days[dk].minutes = (S.stats.days[dk].minutes || 0) + Math.round(elapsed / 60);
+  }
+  if (run.mode === 'review') {
+    S.daily.reviewed += run.correct;
+  }
+
+  /* streak */
+  const t = todayKey();
+  if (S.player.lastActive !== t) {
+    const gap = daysBetween(S.player.lastActive, t);
+    S.player.streak = gap === 1 ? S.player.streak + 1 : Math.max(1, S.player.streak ? 1 : 1);
+    S.player.lastActive = t;
+  }
+
+  /* daily quest bonus */
+  const qs = questState();
+  let questBonus = 0;
+  if (qs.done && !S.daily.claimed) {
+    S.daily.claimed = true;
+    questBonus = 50;
+    xp += questBonus;
+  }
+
+  S.player.xp += xp;
+  const levelAfter = levelInfo(S.player.xp).level;
+  const newly = checkBadges();
+  let unlockedIsland = null;
+  if (run.mode === 'normal' && island && nextIsland && nextWasLocked && isUnlocked(islandIdx + 1)) {
+    unlockedIsland = nextIsland;
+  }
+
+  UI.result = {
+    mode: run.mode,
+    islandId: run.islandId,
+    diff: run.diff,
+    stars, correct: run.correct, wrong: run.wrong,
+    total: run.questions.length, maxCombo: run.maxCombo,
+    xp, timeSec: elapsed, accuracy: acc, failed,
+    newBadges: newly,
+    unlockedIsland,
+    questBonus,
+    leveledUp: levelAfter > levelBefore,
+    level: levelAfter,
+    mastered: run.mastered || 0,
+    masteredTotal: run.questions.filter(q => q.mistakeId).length,
+    demo: run.demo
+  };
+  UI.run = null;
+  UI.view = 'result';
+  persist();
+  render();
+  if (stars >= 2 || newly.length) { sfx('star'); confetti(stars === 3 ? 42 : 28); }
+  else if (stars > 0) sfx('level');
+}
+
+function resultHTML() {
+  const r = UI.result;
+  if (!r) return '';
+  const island = r.mode === 'review' ? REVIEW_META : getIsland(r.islandId);
+  const diff = r.mode === 'review' ? { name:'錯題重練' } : getDiff(r.diff);
+  const review = r.mode === 'review';
+  const title = review
+    ? (r.mastered >= r.masteredTotal && r.mastered > 0 ? '全部掌握！' : '特訓完成！')
+    : r.failed ? '差少少，再嚟過！' : r.stars === 3 ? '完美通關！' : '闖關成功！';
+  const sub = review
+    ? `掌握咗 ${r.mastered} / ${r.masteredTotal} 道錯題`
+    : `${island.name} · ${diff.name} · 答對 ${r.correct} / ${r.total} 題`;
+  const starsHTML = review
+    ? `<div class="res-stars"><span class="res-star on" style="color:#7BE0C8">${icon('check', 58)}</span></div>`
+    : `<div class="res-stars">${[1, 2, 3].map(i => `<span class="res-star ${i <= r.stars ? 'on' : ''}">${starHtml(true, 58)}</span>`).join('')}</div>`;
+
+  const badges = r.newBadges && r.newBadges.length ? `
+    <div class="res-sec">新徽章解鎖</div>
+    <div class="res-badges">
+      ${r.newBadges.map(b => `<div class="res-badge">${medalHtml(b)}<div><b>${b.name}</b><span>${b.desc}</span></div></div>`).join('')}
+    </div>` : '';
+
+  const unlock = r.unlockedIsland ? `<div class="res-unlock">
+      <span class="ico">${icon('lock', 16)}</span>
+      <div>新島嶼解鎖！<b>${r.unlockedIsland.name}</b></div>
+    </div>` : '';
+
+  const note = !review && r.wrong > 0 ? '答錯嘅題目已收入錯題簿，記得回去重練。' : '所有進度已儲存喺呢部裝置。';
+
+  return `<div class="result">
+    <div class="res-hero ${r.failed ? 'fail' : ''}">
+      <div class="res-rays" aria-hidden="true"></div>
+      <button class="icon-btn res-close" data-act="result-map" aria-label="返回地圖">${icon('x', 17)}</button>
+      <div class="res-eyebrow">${review ? '錯題特訓' : island.name + ' · ' + diff.name}</div>
+      ${starsHTML}
+      <h1 class="res-title">${title}</h1>
+      <p class="res-sub">${sub}</p>
+      <div class="res-mascot">${mascot(r.failed ? 'oops' : 'cheer')}</div>
+    </div>
+    <div class="res-panel">
+      <div class="res-xp">
+        ${icon('sparkle', 17)} +${r.xp} XP
+        ${r.questBonus ? `<span class="bonus">任務 +${r.questBonus}</span>` : ''}
+        ${r.leveledUp ? `<small>升到 Lv.${r.level}！</small>` : ''}
+      </div>
+      <div class="res-stats">
+        <div class="res-stat"><b>${r.correct} <small>/ ${r.total}</small></b><span>答對題數</span></div>
+        <div class="res-stat"><b>${r.maxCombo}</b><span>最高連擊</span></div>
+        <div class="res-stat"><b>${Math.floor(r.timeSec / 60)}:${pad2(r.timeSec % 60)}</b><span>冒險時間</span></div>
+      </div>
+      ${badges}
+      ${unlock}
+      <div class="res-actions">
+        <button class="btn primary" data-act="${review ? 'result-mistakes' : 'result-again'}">
+          ${review ? '返錯題簿' : (r.failed ? '再試一次' : '再玩一次')} ${icon('arrow', 16)}
+        </button>
+        <button class="btn secondary" data-act="result-map">${review ? '返地圖' : '返回地圖'}</button>
+      </div>
+      <div class="res-note">${note}</div>
+    </div>
+  </div>`;
+}
+
+/* =========================================================
+   Mistakes
+   ========================================================= */
+function filteredMistakes() {
+  const list = openMistakes();
+  return UI.filter === 'all' ? list : list.filter(m => m.q.island === UI.filter);
+}
+
+function mistakesView() {
+  const list = filteredMistakes();
+  const shortNames = { volcano:'火山', fraction:'分數', geometry:'圖形', word:'應用', algebra:'方程', data:'數據' };
+  const filters = [['all','全部']].concat(ISLANDS.map(i => [i.id, shortNames[i.id] || i.short]));
+  return `${topbarHTML()}
+    <div class="scroll">
+      <div class="page-head">
+        <div>
+          <h1>錯題簿</h1>
+          <div class="sub">${openMistakes().length} 題待攻克 · 已掌握 ${masteredCount()} 題</div>
+        </div>
+        <button class="train-btn" data-act="train" ${list.length ? '' : 'disabled'}>${icon('target', 12)} 錯題特訓</button>
+      </div>
+      <div class="filter-row">
+        ${filters.map(([id, label]) => {
+          const n = id === 'all' ? openMistakes().length : openMistakes().filter(m => m.q.island === id).length;
+          return `<button class="chip ${UI.filter === id ? 'active' : ''}" data-act="filter" data-filter="${id}">${label}<span class="n">${n}</span></button>`;
+        }).join('')}
+      </div>
+      ${masteredCount() ? `<div class="mastered-note">${icon('check', 12)} 你已經重新掌握 ${masteredCount()} 道錯題，繼續保持！</div>` : ''}
+      ${list.length ? `<div class="mistake-list">${list.map(mistakeCard).join('')}</div>` : emptyMistakes()}
+    </div>
+    ${tabbarHTML('mistakes')}`;
+}
+
+function mistakeCard(m) {
+  const island = getIsland(m.q.island) || getIsland('volcano');
+  const d = getDiff(m.q.diff) || DIFFS[1];
+  const open = UI.openMistake === m.id;
+  return `<article class="mistake ${open ? 'open' : ''}">
+    <div class="m-top">
+      <span class="m-island" style="--ic:${island.c2};--ib:${island.c1}22">${islandIcon(m.q.island, 10)}${island.short}</span>
+      <span class="m-diff">${d.name}難度</span>
+      <span class="m-date">${fmtDate(m.createdAt)}</span>
+    </div>
+    <div class="m-q">${m.q.prompt}</div>
+    <div class="m-answers">
+      <div class="m-ans"><em>你嘅答案</em>${m.yourHTML}</div>
+      <div class="m-ans good"><em>正確答案</em>${m.correctHTML}</div>
+    </div>
+    <div class="m-explain"><b>解題思路：</b>${m.q.explain}</div>
+    <div class="m-actions">
+      <button class="mini" data-act="explain" data-id="${m.id}">${icon('bulb', 12)} 解釋</button>
+      <button class="mini solid" data-act="retry-one" data-id="${m.id}">${icon('refresh', 12)} 再做一次</button>
+      <button class="mini green" data-act="master" data-id="${m.id}">${icon('check', 12)} 已掌握</button>
+    </div>
+  </article>`;
+}
+
+function emptyMistakes() {
+  const filtered = UI.filter !== 'all';
+  return `<div class="empty">
+    <svg viewBox="0 0 120 120" fill="none" aria-hidden="true">
+      <circle cx="60" cy="60" r="46" fill="#FFF6DD"/>
+      <path d="M40 40h30l10 10v30H40z" fill="#FFFDF6" stroke="#0B7A72" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M70 40v10h10M48 58h24M48 66h16" stroke="#0B7A72" stroke-width="2.2" stroke-linecap="round"/>
+      <circle cx="80" cy="78" r="15" fill="#4FA85E"/>
+      <path d="m73 78 5 5 9-10" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <h3>${filtered ? '呢個島暫時冇錯題' : '錯題簿空空如也'}</h3>
+    <p>${filtered ? '試下其他島嶼，或者去冒險地圖繼續挑戰。' : '答錯嘅題目會自動出現喺度，重練答啱就可以標記掌握。'}</p>
+  </div>`;
+}
+
+/* =========================================================
+   Badges
+   ========================================================= */
+function badgesView() {
+  const earned = Object.keys(S.badges).length;
+  const pct = Math.round(earned / BADGES.length * 100);
+  return `${topbarHTML()}
+    <div class="scroll">
+      <div class="page-head"><div><h1>徽章</h1><div class="sub">收集成就 · 記錄每一步</div></div></div>
+      <div class="badge-summary">
+        <div style="flex:none">
+          <div class="n">${earned}<small> / ${BADGES.length}</small></div>
+          <div class="t">已收集徽章</div>
+        </div>
+        <div style="flex:1">
+          <div class="t" style="margin-top:0">${earned === BADGES.length ? '全部收集完成，你係真正嘅群島守護者！' : '仲差 ' + (BADGES.length - earned) + ' 枚，繼續探索啦。'}</div>
+          <div class="badge-prog"><i style="width:${pct}%"></i></div>
+        </div>
+      </div>
+      <div class="badge-grid">
+        ${BADGES.map(b => {
+          const got = !!S.badges[b.id];
+          return `<button class="badge-tile ${got ? 'earned' : 'locked'}" data-act="badge" data-id="${b.id}">
+            ${got ? `<span class="spark">${icon('sparkle', 10)}</span>` : ''}
+            ${medalHtml(b)}
+            <b>${b.name}</b>
+            <span>${got ? '已於 ' + fmtDate(S.badges[b.id]) + ' 獲得' : b.hint}</span>
+          </button>`;
+        }).join('')}
+      </div>
+    </div>
+    ${tabbarHTML('badges')}`;
+}
+
+/* =========================================================
+   Progress
+   ========================================================= */
+function weekData() {
+  const out = [];
+  const now = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = addDays(now, -i);
+    const key = ymd(d);
+    const rec = S.stats.days[key] || { answered:0, correct:0, minutes:0 };
+    out.push({ key, label:'日一二三四五六'[d.getDay()], n:rec.answered || 0, today:i === 0 });
+  }
+  return out;
+}
+
+function progressView() {
+  const li = levelInfo(S.player.xp);
+  const week = weekData();
+  const max = Math.max(10, ...week.map(d => d.n));
+  const total = week.reduce((a, b) => a + b.n, 0);
+  const avg = (total / 7).toFixed(1);
+  const today = ymd(new Date());
+  const weekBars = week.map(d => `<div class="wbar ${d.today ? 'today' : ''}">
+      <span class="v">${d.n || ''}</span>
+      <i class="shape" style="height:${Math.max(3, d.n / max * 100)}%"></i>
+      <span class="d">${d.today ? '今' : d.label}</span>
+    </div>`).join('');
+  const mastery = ISLANDS.map((is, i) => {
+    const unlocked = isUnlocked(i);
+    const sum = starSum(is.id);
+    return `<div class="mastery ${unlocked ? '' : 'locked'}">
+      <span class="mastery-ico" style="--c1:${is.c1};--c2:${is.c2}">${unlocked ? islandIcon(is.id, 16) : icon('lock', 14)}</span>
+      <div class="mastery-main">
+        <div class="mastery-top"><span>${is.name}</span><span>${unlocked ? sum + ' / 9 星' : '未解鎖'}</span></div>
+        <div class="mastery-bar"><i style="width:${unlocked ? sum / 9 * 100 : 0}%"></i></div>
+      </div>
+      <div class="mastery-stars">${unlocked ? starsHtml(bestStars(is.id), 10) : ''}</div>
+    </div>`;
+  }).join('');
+
+  return `${topbarHTML()}
+    <div class="scroll">
+      <div class="page-head"><div><h1>進度</h1><div class="sub">你嘅冒險紀錄</div></div></div>
+      <div class="profile-card">
+        <div class="profile-top">
+          <div class="profile-avatar">${esc(S.player.name.slice(0, 1))}</div>
+          <div>
+            <div class="profile-name">${esc(S.player.name)}</div>
+            <div class="profile-rank">Lv.${li.level} · ${li.rank}</div>
+          </div>
+          <button class="edit-name" data-act="edit-name" aria-label="更改名字">${icon('pencil', 13)}</button>
+        </div>
+        <div class="profile-xp">
+          <div class="top"><span>${fmt(S.player.xp)} / ${fmt(li.next)} XP</span><b>距離下一級 ${fmt(Math.max(0, li.next - S.player.xp))} XP</b></div>
+          <div class="profile-bar"><i style="width:${li.pct}%"></i></div>
+        </div>
+        <div class="profile-foot">${icon('flame', 11)} 連續 ${S.player.streak} 日 · 累計 ${totalStars()} / 54 星 · ${Object.keys(S.badges).length} 枚徽章</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">${icon('user', 14)} 學習階段<span class="hint">影響題目深淺</span></div>
+        <div class="stage-seg">
+          <button class="${S.player.stage === 'primary' ? 'active' : ''}" data-act="stage" data-stage="primary">小學 P1–P6</button>
+          <button class="${S.player.stage === 'secondary' ? 'active' : ''}" data-act="stage" data-stage="secondary">中學 S1–S3</button>
+        </div>
+        <div class="stage-note">${icon('info', 11)} 下一關開始會按所選階段出題，唔會影響已記錄嘅進度。</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">${icon('chart', 14)} 數字一覽</div>
+        <div class="stat-grid">
+          <div class="stat-box"><div class="k">${icon('book', 11)} 累計答題</div><div class="v">${fmt(S.stats.answered)}<small>題</small></div></div>
+          <div class="stat-box"><div class="k">${icon('target', 11)} 正確率</div><div class="v">${accuracy()}<small>%</small></div></div>
+          <div class="stat-box"><div class="k">${icon('clock', 11)} 冒險時間</div><div class="v">${Math.round(S.stats.timeSec / 60)}<small>分鐘</small></div></div>
+          <div class="stat-box"><div class="k">${icon('flame', 11)} 最佳連擊</div><div class="v">${S.stats.bestCombo}<small>題</small></div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">${icon('chart', 14)} 近 7 日練習<span class="hint">合共 ${total} 題</span></div>
+        <div class="week-chart">${weekBars}</div>
+        <div class="week-foot"><span>每日平均 <b>${avg}</b> 題</span><span>${today === (S.daily.date || '') ? '今日已完成 ' + S.daily.answered + ' 題' : ''}</span></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">${icon('island', 14)} 島嶼掌握度<span class="hint">每島 9 星為滿</span></div>
+        <div class="mastery-list">${mastery}</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">${icon('motion', 14)} 設定</div>
+        <div class="settings-list">
+          <div class="setting">
+            <span class="setting-ico">${icon('sound', 14)}</span>
+            <div><div class="setting-t">音效</div><div class="setting-s">答題同徽章提示音</div></div>
+            <button class="switch ${S.settings.sound ? 'on' : ''}" role="switch" aria-checked="${S.settings.sound}" data-act="toggle-sound" aria-label="音效開關"><span></span></button>
+          </div>
+          <div class="setting">
+            <span class="setting-ico">${icon('motion', 14)}</span>
+            <div><div class="setting-t">動態效果</div><div class="setting-s">減少動畫可慳電啲</div></div>
+            <button class="switch ${S.settings.motion ? 'on' : ''}" role="switch" aria-checked="${S.settings.motion}" data-act="toggle-motion" aria-label="動態效果開關"><span></span></button>
+          </div>
+          <div class="setting">
+            <span class="setting-ico">${icon('reset', 14)}</span>
+            <div><div class="setting-t">重設進度</div><div class="setting-s">清空所有紀錄，重新開始</div></div>
+            <button class="reset-btn" data-act="reset">重設</button>
+          </div>
+        </div>
+      </div>
+      <div class="privacy-note">${icon('shield', 12)} 所有進度只儲存喺呢部裝置嘅瀏覽器，唔會上傳、唔需要帳號。換裝置或清除瀏覽器資料後，進度會消失。</div>
+    </div>
+    ${tabbarHTML('progress')}`;
+}
+
+/* =========================================================
+   Render
+   ========================================================= */
+function render(opts = {}) {
+  const app = $('#app');
+  if (!app) return;
+  const oldScroll = app.querySelector('.scroll');
+  const top = opts.keepScroll && oldScroll ? oldScroll.scrollTop : 0;
+  const oldPlay = app.querySelector('.play-scroll');
+  const playTop = opts.keepScroll && oldPlay ? oldPlay.scrollTop : 0;
+  app.classList.toggle('no-motion', !S.settings.motion);
+  let html = '';
+  if (UI.view === 'play' && UI.run) html = playHTML();
+  else if (UI.view === 'result' && UI.result) html = resultHTML();
+  else if (UI.view === 'mistakes') html = mistakesView();
+  else if (UI.view === 'badges') html = badgesView();
+  else if (UI.view === 'progress') html = progressView();
+  else html = homeView();
+  app.innerHTML = html;
+  if (top) { const s = app.querySelector('.scroll'); if (s) s.scrollTop = top; }
+  if (playTop) { const s = app.querySelector('.play-scroll'); if (s) s.scrollTop = playTop; }
+  renderOverlay();
+}
+
+
+/* =========================================================
+   Events, keyboard, demo deep-links & boot
+   ========================================================= */
+function goTab(tab) {
+  UI.overlay = null;
+  UI.view = tab === 'home' ? 'home' : tab;
+  UI.tab = tab;
+  UI.result = null;
+  if (tab !== 'mistakes') UI.openMistake = null;
+  render();
+  const sc = $('.scroll');
+  if (sc) sc.scrollTop = 0;
+}
+
+function closeOverlay() {
+  const prev = UI.overlay;
+  UI.overlay = null;
+  renderOverlay();
+  if (prev && prev.type === 'quit' && UI.view === 'play' && UI.run && !UI.run.feedback) startTimer();
+}
+
+function pressKey(k) {
+  const run = UI.run;
+  if (!run || run.feedback || run.q.kind !== 'input') return;
+  let v = run.input || '';
+  if (k === 'del') v = v.slice(0, -1);
+  else if (k === 'sign') v = v.startsWith('-') ? v.slice(1) : '-' + v;
+  else if (k === 'dot') { if (!v.includes('.')) v = (v || '0') + '.'; }
+  else if (/^\d$/.test(k)) {
+    if (v === '0') v = k;
+    else if (v.replace('-', '').replace('.', '').length < 8) v += k;
+  }
+  run.input = v;
+  render({ keepScroll:true });
+}
+
+function submitCurrent() {
+  const run = UI.run;
+  if (!run || run.feedback) return;
+  if (!/^-?\d*\.?\d+$/.test(run.input || '')) {
+    toast('請先輸入完整答案');
+    return;
+  }
+  submitAnswer(run.input, false);
+}
+
+function saveName() {
+  const inp = $('#nameInput');
+  const v = (inp ? inp.value : '').trim();
+  if (!v) { toast('名字唔可以留空'); return; }
+  S.player.name = v.slice(0, 10);
+  persist();
+  UI.overlay = null;
+  renderOverlay();
+  render();
+  toast('已經幫你改好名！');
+}
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el) return;
+  const act = el.dataset.act;
+
+  if (act === 'backdrop') {
+    if (e.target.classList.contains('overlay')) closeOverlay();
+    return;
+  }
+
+  switch (act) {
+    case 'tab':
+      sfx('tap');
+      goTab(el.dataset.tab);
+      break;
+
+    case 'island': {
+      const id = el.dataset.id;
+      const idx = ISLANDS.findIndex(i => i.id === id);
+      if (!isUnlocked(idx)) {
+        const prev = ISLANDS[idx - 1];
+        toast(prev ? `完成「${prev.name}」任何關卡，就可以解鎖呢個島。` : '完成前面嘅島嶼先可以解鎖。');
+        sfx('wrong');
+        return;
+      }
+      sfx('tap');
+      UI.overlay = { type:'island', id };
+      renderOverlay();
+      break;
+    }
+
+    case 'close':
+      closeOverlay();
+      break;
+
+    case 'start':
+      sfx('tap');
+      startRun(el.dataset.island, Number(el.dataset.diff));
+      break;
+
+    case 'answer':
+      if (UI.run && !UI.run.feedback) submitAnswer(Number(el.dataset.index));
+      break;
+
+    case 'key':
+      pressKey(el.dataset.key);
+      break;
+
+    case 'submit':
+      submitCurrent();
+      break;
+
+    case 'hint':
+      if (UI.run && !UI.run.feedback) {
+        UI.run.hint = !UI.run.hint;
+        render({ keepScroll:true });
+      }
+      break;
+
+    case 'next':
+      nextQuestion();
+      break;
+
+    case 'quit':
+      if (!UI.run) { goTab('home'); break; }
+      stopTimer();
+      UI.overlay = { type:'quit' };
+      renderOverlay();
+      break;
+
+    case 'confirm-quit':
+      sfx('tap');
+      quitRun();
+      break;
+
+    case 'result-map':
+      sfx('tap');
+      UI.result = null;
+      UI.view = 'home'; UI.tab = 'home';
+      render();
+      break;
+
+    case 'result-again': {
+      const r = UI.result;
+      if (!r) { goTab('home'); break; }
+      sfx('tap');
+      startRun(r.islandId, r.diff);
+      break;
+    }
+
+    case 'result-mistakes':
+      sfx('tap');
+      UI.result = null;
+      goTab('mistakes');
+      break;
+
+    case 'filter':
+      UI.filter = el.dataset.filter;
+      UI.openMistake = null;
+      render({ keepScroll:true });
+      break;
+
+    case 'train': {
+      const list = filteredMistakes();
+      if (!list.length) { toast('呢個篩選暫時冇錯題。'); return; }
+      sfx('tap');
+      startReview(list);
+      break;
+    }
+
+    case 'retry-one': {
+      const m = S.mistakes.find(x => x.id === el.dataset.id);
+      if (m && !m.mastered) { sfx('tap'); startReview([m]); }
+      break;
+    }
+
+    case 'master':
+      if (el.dataset.id) markMastered(el.dataset.id);
+      break;
+
+    case 'explain':
+      UI.openMistake = UI.openMistake === el.dataset.id ? null : el.dataset.id;
+      render({ keepScroll:true });
+      break;
+
+    case 'badge':
+      sfx('tap');
+      UI.overlay = { type:'badge', id:el.dataset.id };
+      renderOverlay();
+      break;
+
+    case 'toggle-sound':
+      S.settings.sound = !S.settings.sound;
+      persist();
+      if (S.settings.sound) sfx('tap');
+      render({ keepScroll:true });
+      toast(S.settings.sound ? '音效已開啟' : '音效已關閉');
+      break;
+
+    case 'toggle-motion':
+      S.settings.motion = !S.settings.motion;
+      persist();
+      render({ keepScroll:true });
+      toast(S.settings.motion ? '動態效果已開啟' : '已減少動態效果');
+      break;
+
+    case 'stage':
+      if (S.player.stage !== el.dataset.stage) {
+        S.player.stage = el.dataset.stage;
+        persist();
+        render({ keepScroll:true });
+        toast(el.dataset.stage === 'secondary' ? '已切換到中學程度，下一關會用新題目。' : '已切換到小學程度，下一關會用新題目。');
+        sfx('tap');
+      }
+      break;
+
+    case 'reset':
+      UI.overlay = { type:'reset' };
+      renderOverlay();
+      break;
+
+    case 'confirm-reset':
+      resetProgress();
+      UI.overlay = null;
+      UI.result = null;
+      UI.run = null;
+      UI.filter = 'all';
+      UI.openMistake = null;
+      UI.view = 'home';
+      UI.tab = 'home';
+      render();
+      toast('已重設所有進度，重新開始冒險！');
+      break;
+
+    case 'edit-name':
+      UI.overlay = { type:'name' };
+      renderOverlay();
+      break;
+
+    case 'save-name':
+      saveName();
+      break;
+
+    default:
+      break;
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (UI.overlay) { closeOverlay(); return; }
+    if (UI.view === 'play' && UI.run) {
+      stopTimer();
+      UI.overlay = { type:'quit' };
+      renderOverlay();
+      return;
+    }
+    if (UI.view === 'result') {
+      UI.result = null; UI.view = 'home'; UI.tab = 'home'; render();
+      return;
+    }
+  }
+  if (UI.overlay && UI.overlay.type === 'name' && e.key === 'Enter') {
+    e.preventDefault();
+    saveName();
+    return;
+  }
+  if (UI.view !== 'play' || !UI.run || UI.overlay) return;
+  const run = UI.run;
+  if (run.feedback) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); nextQuestion(); }
+    return;
+  }
+  if (run.q.kind === 'input') {
+    if (/^\d$/.test(e.key)) { e.preventDefault(); pressKey(e.key); }
+    else if (e.key === '.') { e.preventDefault(); pressKey('dot'); }
+    else if (e.key === '-') { e.preventDefault(); pressKey('sign'); }
+    else if (e.key === 'Backspace') { e.preventDefault(); pressKey('del'); }
+    else if (e.key === 'Enter') { e.preventDefault(); submitCurrent(); }
+  } else {
+    const n = parseInt(e.key, 10);
+    if (n >= 1 && n <= run.q.options.length) { e.preventDefault(); submitAnswer(n - 1); return; }
+    const idx = 'abcd'.indexOf(e.key.toLowerCase());
+    if (idx >= 0 && idx < run.q.options.length) { e.preventDefault(); submitAnswer(idx); }
+  }
+});
+
+/* =========================================================
+   Deep links used by the preview screenshots / QA
+   screen=home|play|result|mistakes|badges|progress
+   play: island=volcano&diff=2&q=2
+   sheet=volcano
+   ========================================================= */
+function applyDeepLink() {
+  const qs = new URLSearchParams(location.search);
+  if (qs.get('fresh') === '1') {
+    S = blankState();
+    persist();
+  }
+  const screen = qs.get('screen');
+  if (screen === 'play') {
+    const islandId = getIsland(qs.get('island') || 'fraction') ? (qs.get('island') || 'fraction') : 'fraction';
+    const diff = clamp(Number(qs.get('diff') || 2), 1, 3);
+    const idx = clamp(Number(qs.get('q') || 2), 0, 7);
+    startRun(islandId, diff, { seed:'demo-' + islandId + '-' + diff, index:idx, demoPaused:true, demo:true });
+    if (UI.run) {
+      for (let i = 0; i < idx; i++) UI.run.results[i] = 'ok';
+      UI.run.correct = Math.min(idx, 2);
+      UI.run.maxCombo = UI.run.correct;
+      UI.run.combo = UI.run.correct;
+      const q = UI.run.q;
+      if (q && q.timer) {
+        UI.run.timeLeft = Math.min(8.4, q.timer);
+        updateTimerDom(UI.run.timeLeft);
+      }
+    }
+  } else if (screen === 'result') {
+    S.badges.fraction = S.badges.fraction || new Date().toISOString();
+    UI.result = {
+      mode:'normal', islandId:'fraction', diff:3, stars:3,
+      correct:8, wrong:0, total:8, maxCombo:8, xp:221, timeSec:76,
+      accuracy:100, failed:false,
+      newBadges:[BADGES.find(b => b.id === 'fraction')],
+      unlockedIsland:null, questBonus:50, leveledUp:false, level:4,
+      mastered:0, masteredTotal:0, demo:true
+    };
+    UI.view = 'result';
+  } else if (screen === 'mistakes' || screen === 'badges' || screen === 'progress') {
+    UI.view = screen;
+    UI.tab = screen;
+  }
+  render();
+  if (qs.get('sheet')) {
+    const id = qs.get('sheet');
+    if (getIsland(id)) {
+      UI.overlay = { type:'island', id };
+      renderOverlay();
+    }
+  }
+  if (screen === 'result') setTimeout(() => confetti(28), 180);
+  if (screen === 'play') setTimeout(() => { const q = UI.run && UI.run.q; if (q && q.timer) updateTimerDom(UI.run.timeLeft); }, 60);
+}
+
+/* test / automation hook */
+window.__NAI = {
+  get S() { return S; },
+  UI,
+  startRun, startReview, submitAnswer, nextQuestion, finishRun,
+  render, goTab, closeOverlay, checkBadges
+};
+
+applyDeepLink();
+
+</script>
+</body>
+</html>

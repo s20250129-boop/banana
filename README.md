@@ -1,84 +1,100 @@
 # 數字冒險島 · Number Adventure Island
 
-> 玩住闖關，練好數學。為中小學生而設的數學冒險遊戲原型。
+> 玩住闖關，練好數學。A bilingual commercial site with a fully playable math game for P4–S3 students.
 
-**▶ [即時試玩](https://s20250129-boop.github.io/banana/)** · [產品設計筆記](產品設計.md)
+**▶ [Live website](https://s20250129-boop.github.io/banana/)** · [Play the game](https://s20250129-boop.github.io/banana/app/) · [Product design notes](產品設計.md) · [Website design notes](網站設計.md)
 
-![數字冒險島冒險地圖](預覽/01-冒險地圖.png)
+![數字冒險島](assets/img/home.webp)
 
-## 這是什麼
+## The project
 
-數字冒險島將數學練習包裝成 3–5 分鐘的島嶼冒險：學生自選島嶼與難度，答 6–8 題過關，取得星星、XP 與徽章；答錯的題目會自動進入錯題簿，可以隨時重練。
+數字冒險島（Number Adventure Island）把數學練習變成 3–5 分鐘的島嶼冒險。學生自選島嶼與難度，答 6–8 題過關，取得星星、XP 與徽章；答錯的題目會自動進入錯題簿，可以隨時重練。
 
-- **六個島嶼**：火山速算、分數叢林、圖形海灣、應用題沙漠、方程山洞、數據燈塔
-- **三種難度**：探索（6 題）、挑戰（8 題）、極限（8 題）
-- **四顆心、三星制**：最多錯 1 題得 3 星；4 次失誤中止
-- **十四枚徽章**：課題精通、連擊、錯題清零、七日連續、逆轉勝等
-- **錯題簿**：自動記錄、篩選、解題解釋、錯題特訓、標記掌握
-- **進度**：XP／等級、每日任務、連續日數、7 日練習圖、島嶼掌握度
-- **小學／中學切換**：下一關按學習階段出題
+The project now has two layers:
 
-介面以繁體中文及香港用語為主；數學術語保留標準寫法。
+- **`/`** — a bilingual (繁體中文 / English) commercial website: product story, six-island overview, live demo, learning design, curriculum, plans, author and FAQ.
+- **`/app/`** — the original playable game, preserved in full and embedded in the site's live-demo modal. It can also be opened directly.
 
-## 本地運行
+**Author / 作者：2A 余卓烽**
 
-最簡單：直接雙擊 `index.html`。這是單一檔案、離線可玩的版本，不需要伺服器或安裝。
+## What's inside
 
-想用本地伺服器：
+### Marketing site
+- Responsive one-page site with a language switch (中 / EN), persisted in `localStorage` and shareable with `?lang=en`.
+- Hero, problem framing, six-island cards, interactive live demo, screenshot gallery, learning design, curriculum coverage, progress, plans, author, FAQ and final CTA.
+- SEO metadata, Open Graph/Twitter image, JSON-LD `EducationalApplication`, `robots.txt`, `sitemap.xml` and a branded `404.html`.
+- Accessible focus states, reduced-motion support, semantic landmarks, mobile menu and a focus-managed demo modal.
+- No cookies, no analytics, no tracking.
 
-```bash
-python3 -m http.server 8000
-# 打開 http://localhost:8000
-```
+### Game
+- **6 islands**: 四則運算、分數、圖形與度量、應用題、代數、數據與概率.
+- **3 difficulty levels**: 探索 6 題、挑戰 8 題、極限 8 題.
+- **4 hearts / 3 stars**: 4 misses end a run; 3 stars for at most 1 mistake.
+- **14 badges**, daily quests, streak, XP/levels and a 7-day progress chart.
+- **Mistake notebook**: automatic capture, filters, worked explanations, review runs and “mastered” marking.
+- **Local-first**: progress is stored in `localStorage`; no account or backend.
 
-第一次打開會載入示範進度（阿澄，Lv.4）；想由零開始：**進度 → 重設進度**。
-
-## 專案結構
+## Structure
 
 ```
 .
-├── index.html              # 建置完成、可直接開啟的單一檔案 App
-├── 產品設計.md              # 產品定位、學習設計、遊戲機制、技術取捨
-├── 預覽/                   # 9 張 390×844 @2x 手機截圖
-├── src/                    # 可維護原始碼（CSS / JS 分檔）
-│   ├── shell.html
-│   ├── styles.css
-│   ├── app.js
-│   ├── questions.js
-│   ├── ui.js
-│   └── boot.js
-├── build.py                # 將 src/ 打包成單一 index.html
-└── .github/workflows/      # GitHub Pages 自動部署
+├── index.html                 # bilingual marketing site
+├── 404.html
+├── robots.txt / sitemap.xml
+├── assets/
+│   ├── site.css / site.js     # site design + bilingual copy + interactions
+│   ├── img/                   # WebP app screenshots
+│   ├── og-cover.png
+│   └── favicon.svg
+├── app/index.html             # built playable game
+├── src/                       # game source (CSS / JS split)
+├── build.py                   # game: src/ → app/index.html
+├── build_site.py              # game build + assemble public site/
+├── 產品設計.md                 # game/product design notes
+├── 網站設計.md                 # commercial website design notes
+└── .github/workflows/         # GitHub Pages deployment
 ```
 
-`index.html` 由 `src/` 自動生成；修改 `src/` 後執行：
+## Run locally
 
 ```bash
-python3 build.py
+# Build the game and the public site
+python3 build_site.py
+
+# Serve the repo root (marketing site + /app/)
+python3 -m http.server 8000
+# open http://localhost:8000
 ```
 
-## 自動部署
+The game also works as a single offline file: `app/index.html`. Opening the marketing site via `file://` works for reading, but the `/app/` demo is best tested through a local server.
 
-`.github/workflows/deploy-pages.yml` 會在每次 **push／merge 到 `main`** 時：
+## Deployment
 
-1. 用 `python3 build.py` 從 `src/` 重新建置 `index.html`
-2. 準備只包含網站檔案的 `site/` artifact
-3. 發佈到 GitHub Pages（GitHub Actions source）
+The GitHub Actions workflow [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) runs on every push/merge to `main`:
 
-網站：<https://s20250129-boop.github.io/banana/>
+1. Checks out the repo.
+2. Runs `python3 build_site.py` to rebuild the game and assemble `site/`.
+3. Uploads `site/` as the GitHub Pages artifact.
+4. Deploys with `actions/deploy-pages`.
 
-## 資料與私隱
+The public site is <https://s20250129-boop.github.io/banana/>.
 
-- 所有進度只儲存在瀏覽器的 `localStorage`，沒有後端、沒有帳號、沒有追蹤。
-- 換裝置或清除瀏覽器資料後，進度會消失。
-- 示範進度是虛構資料，不代表真實學習紀錄。
+## Language note
 
-## 狀態
+The marketing website, FAQ and learning guide are fully bilingual. The playable prototype's in-game text is currently Traditional Chinese; an English game UI is on the roadmap. Math notation and the game mechanics are language-independent.
 
-這是一個**互動設計原型**，不是正式產品：
+## Privacy
 
-- 題目由演算法即時生成，日後應加入老師審核題庫及課程標籤。
-- 未有帳號同步、家長／老師後台、間隔重複排程。
-- 已用 headless Chrome 驗證完整流程；題目生成做過結構、分數運算及代數代入測試。
+No cookies, no tracking, no account. Progress is stored only in the browser's `localStorage`. Clearing browser data resets progress. The demo on the site uses the same local storage as `/app/`.
 
-更多設計取捨、資料模型、成效指標及路線圖，請看 [產品設計.md](產品設計.md)。
+## Author
+
+**2A 余卓烽** — 產品設計、介面、題目引擎、網站與部署。
+Form 2A student from Hong Kong. Built the concept, interface, question engine, website and deployment.
+
+- GitHub: [@s20250129-boop](https://github.com/s20250129-boop)
+- Design notes: [產品設計.md](產品設計.md)
+
+## Status
+
+This is an interactive prototype, not a production SaaS. Questions are generated algorithmically; the next steps are a teacher-reviewed question bank, spaced repetition, family sync, a teacher view and English game content. See the design notes for details.

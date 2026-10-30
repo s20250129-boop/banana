@@ -29,14 +29,8 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: Build single-file app
-        run: python3 build.py
-
-      - name: Prepare Pages artifact
-        run: |
-          mkdir -p site
-          cp index.html site/index.html
-          cp .nojekyll site/.nojekyll
+      - name: Build game and marketing site
+        run: python3 build_site.py
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bundle the prototype into one self-contained index.html."""
+"""Bundle the game prototype into app/index.html (deployed as /app/)."""
 from pathlib import Path
 
 root = Path(__file__).resolve().parent
@@ -11,5 +11,7 @@ css = (src / "styles.css").read_text(encoding="utf-8")
 shell = (src / "shell.html").read_text(encoding="utf-8")
 
 html = shell.replace("{{CSS}}", css).replace("{{JS}}", js)
-(root / "index.html").write_text(html, encoding="utf-8")
-print(f"built {root / 'index.html'} ({len(html):,} bytes)")
+out = root / "app" / "index.html"
+out.parent.mkdir(parents=True, exist_ok=True)
+out.write_text(html, encoding="utf-8")
+print(f"built {out} ({len(html):,} bytes)")

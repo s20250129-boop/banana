@@ -295,6 +295,14 @@ function applyDeepLink() {
     S = blankState();
     persist();
   }
+  // Marketing-site deep links: /app/?start=1&island=fraction&diff=2
+  // starts a real run (not the paused screenshot demo).
+  const autoIsland = qs.get('island');
+  if (qs.get('start') === '1' && autoIsland && getIsland(autoIsland)) {
+    const autoDiff = clamp(Number(qs.get('diff') || 1), 1, 3);
+    startRun(autoIsland, autoDiff);
+    return;
+  }
   const screen = qs.get('screen');
   if (screen === 'play') {
     const islandId = getIsland(qs.get('island') || 'fraction') ? (qs.get('island') || 'fraction') : 'fraction';

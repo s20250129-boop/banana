@@ -478,7 +478,7 @@ function playHTML() {
   if (fb) {
     const title = fb.ok ? '答啱喇！' : fb.timeout ? '時間到！' : '差少少。';
     const gain = fb.ok ? (10 + Math.min(run.combo, 6) * 2) : 0;
-    feedback = `<div class="feedback ${fb.ok ? 'ok' : 'bad'}">
+    feedback = `<div class="feedback ${fb.ok ? 'ok' : 'bad'}" role="status" aria-live="polite" aria-atomic="true">
       <div class="fb-head">
         <span class="fb-ico">${icon(fb.ok ? 'check' : 'x', 14)}</span>
         ${title}

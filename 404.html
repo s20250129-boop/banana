@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>404 · 數字冒險島</title>
+<link rel="icon" href="/banana/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/banana/assets/site.css">
+<style>
+  .error-page{min-height:100dvh;background:var(--ocean);color:var(--cream);display:grid;place-items:center;text-align:center;padding:32px;position:relative;overflow:hidden}
+  .error-page::before{content:"";position:absolute;inset:0;background:repeating-radial-gradient(circle at 50% 40%,transparent 0 44px,rgba(251,243,223,.06) 44px 45px,transparent 45px 90px);opacity:.7}
+  .error-inner{position:relative;z-index:2;max-width:560px}
+  .error-code{font-family:var(--display);font-size:clamp(90px,20vw,170px);font-weight:900;line-height:.8;letter-spacing:-.08em;color:var(--mango);margin:18px 0 8px}
+  .error-inner h1{font-size:clamp(26px,5vw,38px);margin-bottom:10px}
+  .error-inner p{font-size:13px;line-height:1.7;color:rgba(251,243,223,.6);margin-bottom:24px}
+  .error-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .error-inner .brand{justify-content:center;margin-bottom:18px}
+  .error-inner .brand-text strong{color:var(--cream)}
+  .error-inner .brand-text em{color:rgba(251,243,223,.4)}
+</style>
+</head>
+<body>
+<main class="error-page">
+  <div class="error-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="17" fill="#16A394"/><circle cx="32" cy="38" r="17" fill="#FFC24B"/><path d="M14 42c5-8 10-12 18-12s13 4 18 12c-5 5-10 8-18 8s-13-3-18-8z" fill="#0E6573"/><path d="M32 26V12l8 5-8 4" fill="#FFF8E8"/></svg></span>
+      <span class="brand-text"><strong>數字冒險島</strong><em>NUMBER ADVENTURE ISLAND</em></span>
+    </div>
+    <div class="error-code">404</div>
+    <h1>呢個島未開發 / This island isn't on the map yet.</h1>
+    <p>你搵嘅頁面唔存在，或者已經移動咗。返去地圖，揀另一個島再試。<br>The page you're looking for doesn't exist or has moved. Head back to the map and pick another island.</p>
+    <div class="error-actions">
+      <a class="btn btn-coral btn-lg" href="/banana/">返回首頁 / Home</a>
+      <a class="btn btn-ghost-light btn-lg" href="/banana/app/">試玩 / Play</a>
+    </div>
+  </div>
+</main>
+</body>
+</html>

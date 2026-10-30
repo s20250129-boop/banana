@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://s20250129-boop.github.io/banana/sitemap.xml
